@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <RootNamespace>ZapretHub</RootNamespace>
+    <AssemblyName>ZapretHub</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>ui\app.ico</ApplicationIcon>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+    <Version>1.0.0</Version>
+    <Product>Zapret Hub</Product>
+    <DebugType>none</DebugType>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+  <PropertyGroup>
+    <WV2Version>1.0.3485.44</WV2Version>
+    <WV2Dir>$(NuGetPackageRoot)microsoft.web.webview2\$(WV2Version)\</WV2Dir>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="$(WV2Version)" ExcludeAssets="runtime" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Management" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ui\index.html" LogicalName="ui.index.html" />
+    <EmbeddedResource Include="ui\app.ico" LogicalName="ui.app.ico" />
+    <EmbeddedResource Include="$(WV2Dir)lib\net462\Microsoft.Web.WebView2.Core.dll" LogicalName="lib.Microsoft.Web.WebView2.Core.dll" />
+    <EmbeddedResource Include="$(WV2Dir)lib\net462\Microsoft.Web.WebView2.WinForms.dll" LogicalName="lib.Microsoft.Web.WebView2.WinForms.dll" />
+    <EmbeddedResource Include="$(WV2Dir)build\native\x64\WebView2Loader.dll" LogicalName="native.x64.WebView2Loader.dll" />
+    <EmbeddedResource Include="$(WV2Dir)build\native\x86\WebView2Loader.dll" LogicalName="native.x86.WebView2Loader.dll" />
+    <EmbeddedResource Include="$(WV2Dir)build\native\arm64\WebView2Loader.dll" LogicalName="native.arm64.WebView2Loader.dll" />
+  </ItemGroup>
+</Project>
