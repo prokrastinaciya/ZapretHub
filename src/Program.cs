@@ -12,6 +12,9 @@ namespace ZapretHub
     static class Program
     {
         public const string ShowEventName = "ZapretHub.ShowWindow";
+        public const string QuitEventName = "ZapretHub.Quit";
+        const string MutexName = "Global\\ZapretHub.SingleInstance";
+        public static bool JustUpdated;
 
         [STAThread]
         static void Main(string[] args)
@@ -34,22 +37,51 @@ namespace ZapretHub
         [MethodImpl(MethodImplOptions.NoInlining)]
         static void Run(string[] args)
         {
-            using (var mutex = new Mutex(true, "Global\\ZapretHub.SingleInstance", out var created))
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
+            if (args.Contains("--uninstall")) { Installer.UninstallCli(); return; }
+            if (Installer.IsSetupLaunch()) { Installer.SetupCli(); return; }
+
+            using (var mutex = new Mutex(false, MutexName))
             {
-                if (!created)
+                // after a self-update or an install the previous process may still be shutting down
+                JustUpdated = args.Contains("--updated");
+                if (!Acquire(mutex, JustUpdated ? 20000 : 0))
                 {
                     try { EventWaitHandle.OpenExisting(ShowEventName).Set(); } catch { }
                     return;
                 }
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
-                Application.ThreadException += (s, e) => Log.Err("app", e.Exception.Message);
-                AppDomain.CurrentDomain.UnhandledException += (s, e) => Log.Err("app", (e.ExceptionObject as Exception)?.ToString());
+                try
+                {
+                    Application.ThreadException += (s, e) => Log.Err("app", e.Exception.Message);
+                    AppDomain.CurrentDomain.UnhandledException += (s, e) => Log.Err("app", (e.ExceptionObject as Exception)?.ToString());
 
-                App.Init();
-                Log.Info("app", "Zapret Hub " + App.Version + " запущен");
-                PrepareLoader();
-                Application.Run(new MainForm(args.Contains("--tray") || App.Settings.StartMinimized));
+                    App.Init();
+                    Log.Info("app", "Zapret Hub " + App.Version + L.T(" запущен", " started"));
+                    PrepareLoader();
+                    Application.Run(new MainForm(args.Contains("--tray") || App.Settings.StartMinimized));
+                }
+                finally { try { mutex.ReleaseMutex(); } catch { } }
+            }
+        }
+
+        static bool Acquire(Mutex m, int ms)
+        {
+            try { return m.WaitOne(ms); }
+            catch (AbandonedMutexException) { return true; }
+        }
+
+        /// <summary>Asks a running Zapret Hub to quit and waits until it has released the single-instance mutex.</summary>
+        public static bool StopRunningInstance(int ms)
+        {
+            using (var m = new Mutex(false, MutexName))
+            {
+                if (Acquire(m, 0)) { m.ReleaseMutex(); return true; }
+                try { EventWaitHandle.OpenExisting(QuitEventName).Set(); } catch { }
+                if (!Acquire(m, ms)) return false;
+                m.ReleaseMutex();
+                return true;
             }
         }
 

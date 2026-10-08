@@ -286,6 +286,33 @@ pre.raw{font-family:var(--mono);font-size:12px;line-height:1.55;white-space:pre-
 .check:hover{background:rgba(255,255,255,.05)}
 .check input{accent-color:var(--violet);width:15px;height:15px}
 .checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:2px;max-height:230px;overflow:auto;padding:6px;border-radius:12px;background:rgba(8,6,20,.35);border:1px solid var(--stroke)}
+.g3u{grid-template-columns:repeat(3,1fr)}
+@media (max-width:1240px){.g3u{grid-template-columns:1fr 1fr}}
+.tog{cursor:pointer;user-select:none;transition:all .15s}
+.tog:hover{border-color:var(--stroke-2);color:var(--text)}
+.tog.on{color:#e3dbff;background:rgba(139,108,255,.28);border-color:rgba(139,108,255,.55)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.qr{width:212px;height:212px;flex:none;padding:10px;border-radius:18px;background:#fff;box-shadow:0 14px 40px -14px rgba(63,169,255,.7)}
+.qr svg{width:100%;height:100%;display:block}
+.lan{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
+.hk{cursor:pointer;font-family:var(--mono);text-align:center}
+.blk{border-radius:16px;border:1px solid var(--stroke);background:rgba(8,6,20,.3);margin-top:12px}
+.blk>summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.blk>summary::-webkit-details-marker{display:none}
+.blk>summary .n{font:600 13px var(--display);color:var(--violet);width:62px;flex:none}
+.blk>summary .sm{font-family:var(--mono);font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.blk .bd{padding:4px 14px 16px;display:flex;flex-direction:column;gap:12px}
+.blk[open]>summary{border-bottom:1px solid var(--stroke)}
+.hist{position:relative}
+.hist svg{display:block;width:100%}
+.hist text{font:11.5px var(--font);fill:var(--dim)}
+.hist .tip{position:absolute;pointer-events:none;z-index:5;min-width:190px;padding:10px 12px;border-radius:12px;background:rgba(20,17,38,.95);border:1px solid var(--stroke-2);font-size:12.5px;box-shadow:0 14px 30px -10px rgba(0,0,0,.7);display:none}
+.hist .tip b{font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--dim)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:6px;vertical-align:-2px}
+.stat{padding:16px 18px}
+.stat .v{font:600 30px/1.1 var(--display);letter-spacing:-.6px}
+.stat .k{font-size:12.5px;color:var(--dim);margin-top:4px}
 </style>
 </head>
 <body>
@@ -311,6 +338,8 @@ pre.raw{font-family:var(--mono);font-size:12px;line-height:1.55;white-space:pre-
     <section class="page" data-page="home">
       <div class="head"><div><h1 id="greet">Обзор</h1><p>Обход блокировок Discord / YouTube и прокси для Telegram — в одном месте</p></div><div class="sp"></div>
         <button class="btn" id="btnQuick"><svg data-i="pulse"></svg>Проверить связь</button></div>
+      <div id="installBanner"></div>
+      <div id="healBanner"></div>
       <div id="updBanner"></div>
       <div class="grid g2">
         <div class="glass hero" id="heroZ">
@@ -322,7 +351,7 @@ pre.raw{font-family:var(--mono);font-size:12px;line-height:1.55;white-space:pre-
               <select class="input grow" id="zSelect"></select>
               <button class="btn icon" id="zRestart" title="Перезапустить"><svg data-i="refresh"></svg></button>
             </div>
-            <div class="row small muted" id="zMeta"></div>
+            <div class="row small muted wrap" id="zMeta"></div>
           </div>
         </div>
         <div class="glass hero" id="heroT">
@@ -331,7 +360,7 @@ pre.raw{font-family:var(--mono);font-size:12px;line-height:1.55;white-space:pre-
           <div class="info">
             <div><div class="row"><span class="name">TG WS Proxy</span><span id="tChip"></span></div><div class="state" id="tState">—</div></div>
             <div class="linkbox" id="tLinkBox"><code id="tLink">—</code><button class="btn sm ghost icon" id="tCopy" title="Скопировать"><svg data-i="copy"></svg></button></div>
-            <div class="row"><button class="btn tg sm" id="tConnect"><svg data-i="send"></svg>Подключить Telegram</button><span class="small muted" id="tMeta"></span></div>
+            <div class="row wrap"><button class="btn tg sm" id="tConnect"><svg data-i="send"></svg>Подключить Telegram</button><button class="btn sm" id="tPhone"><svg data-i="phone"></svg>На телефон</button><span class="small muted" id="tMeta"></span></div>
           </div>
         </div>
       </div>
@@ -356,7 +385,8 @@ pre.raw{font-family:var(--mono);font-size:12px;line-height:1.55;white-space:pre-
     <!-- ═════════ ZAPRET ═════════ -->
     <section class="page" data-page="zapret">
       <div class="head"><div><h1>Стратегии zapret</h1><p>Запуск вручную или установка службой Windows (работает без Zapret Hub и стартует вместе с системой)</p></div><div class="sp"></div>
-        <input class="input" id="stratFilter" placeholder="Поиск…" style="width:200px">
+        <input class="input" id="stratFilter" placeholder="Поиск…" style="width:180px">
+        <button class="btn" id="stratNew"><svg data-i="edit"></svg>Создать стратегию</button>
         <button class="btn danger" id="zRemove"><svg data-i="trash"></svg>Удалить службы</button></div>
       <div class="glass card"><div class="strats" id="strats"></div></div>
       <div class="grid g2 mt">
@@ -393,13 +423,43 @@ pre.raw{font-family:var(--mono);font-size:12px;line-height:1.55;white-space:pre-
       </div>
     </section>
 
+    <!-- ═════════ STRATEGY EDITOR ═════════ -->
+    <section class="page" data-page="editor">
+      <div class="head"><div><h1>Редактор стратегии</h1><p>Соберите набор аргументов winws в форме и сохраните его как новую стратегию</p></div><div class="sp"></div>
+        <button class="btn ghost" data-go="zapret"><svg data-i="back"></svg>К стратегиям</button></div>
+      <div class="grid g2">
+        <div class="glass card">
+          <h3><svg data-i="edit"></svg>Стратегия</h3>
+          <label class="field mt"><span>Название</span><div class="row"><span class="mono muted">custom (</span><input class="input grow" id="edName" maxlength="40" placeholder="Мой провайдер"><span class="mono muted">)</span></div></label>
+          <label class="field mt"><span>Взять за основу</span><div class="row"><select class="input grow" id="edBase"></select><button class="btn" id="edLoad"><svg data-i="download"></svg>Загрузить</button></div></label>
+          <div class="small muted mts">Своя стратегия хранится рядом с остальными как <span class="mono">custom (…).bat</span> и не удаляется при обновлении zapret.</div>
+        </div>
+        <div class="glass card">
+          <h3><svg data-i="sliders"></svg>Перехват WinDivert</h3><div class="sub">Какие порты winws вообще забирает на обработку (--wf-tcp / --wf-udp)</div>
+          <div class="grid g2 mt"><label class="field"><span>TCP</span><input class="input mono" id="edWfTcp" data-g="wfTcp" placeholder="80,443,%GameFilterTCP%"></label><label class="field"><span>UDP</span><input class="input mono" id="edWfUdp" data-g="wfUdp" placeholder="443,50000-50100"></label></div>
+          <div class="small muted mts"><span class="mono">%GameFilterTCP%</span> и <span class="mono">%GameFilterUDP%</span> подставляются из настроек Game Filter.</div>
+        </div>
+      </div>
+      <div class="glass card mt">
+        <div class="row"><h3><svg data-i="list"></svg>Блоки правил</h3><div class="grow"></div><button class="btn sm" id="edAdd"><svg data-i="plus"></svg>Добавить блок</button></div>
+        <div class="sub">Каждый блок — отдельный профиль winws (разделяются --new): фильтр трафика и способ обхода для него</div>
+        <div id="edBlocks"></div>
+      </div>
+      <div class="glass card mt">
+        <div class="row"><h3><svg data-i="terminal"></svg>Аргументы winws</h3><div class="grow"></div><button class="btn sm ghost icon" id="edCopy" title="Скопировать"><svg data-i="copy"></svg></button></div>
+        <div class="logbox mt" style="height:auto;max-height:260px"><pre class="raw" id="edPreview"></pre></div>
+      </div>
+      <div class="row mt wrap"><button class="btn pri" id="edSave"><svg data-i="check"></svg>Сохранить</button><button class="btn" id="edSaveTest"><svg data-i="flask"></svg>Сохранить и проверить</button><button class="btn" id="edSaveRun"><svg data-i="play"></svg>Сохранить и запустить</button><div class="grow"></div><button class="btn danger hidden" id="edDelete"><svg data-i="trash"></svg>Удалить</button></div>
+    </section>
+
     <!-- ═════════ TESTS / ALT FINDER ═════════ -->
     <section class="page" data-page="tests">
       <div class="head"><div><h1>Поиск рабочего ALT</h1><p>Каждая стратегия запускается по очереди и проверяется запросами к Discord, YouTube, Google, Cloudflare</p></div></div>
       <div class="grid g2">
         <div class="glass card">
           <h3><svg data-i="flask"></svg>Параметры теста</h3>
-          <div class="seg mt" id="testMode"><button data-v="standard" class="on">Стандартный (HTTP / TLS / ping)</button><button data-v="dpi">DPI 16–20 KB</button></div>
+          <div class="seg mt" id="testMode"><button data-v="standard" class="on">Стандартный</button><button data-v="dpi">DPI 16–20 KB</button><button data-v="site">Свой сайт</button></div>
+          <div class="row mts hidden" id="siteRow"><input class="input mono grow" id="siteUrl" placeholder="example.com" spellcheck="false"></div>
           <div class="small muted mts" id="testModeHint"></div>
           <div class="row mt"><span class="small muted grow">Стратегии</span><button class="btn sm ghost" id="tsAll">Все</button><button class="btn sm ghost" id="tsNone">Ни одной</button></div>
           <div class="checks mts" id="testList"></div>
@@ -413,7 +473,7 @@ pre.raw{font-family:var(--mono);font-size:12px;line-height:1.55;white-space:pre-
         </div>
       </div>
       <div class="glass card mt" id="testRun">
-        <div class="row"><h3><svg data-i="trophy"></svg>Результаты</h3><div class="grow"></div><span class="small muted" id="testWhen"></span></div>
+        <div class="row"><h3><svg data-i="trophy"></svg><span id="testTitle">Результаты</span></h3><div class="grow"></div><span class="small muted" id="testWhen"></span></div>
         <div class="mt hidden" id="testProg"><div class="row small"><span id="testNow" class="grow">—</span><span id="testCnt" class="muted"></span></div><div class="progress mts"><i id="testBar" style="width:0"></i></div></div>
         <div class="mt" id="testRes"></div>
       </div>
@@ -421,10 +481,15 @@ pre.raw{font-family:var(--mono);font-size:12px;line-height:1.55;white-space:pre-
 
     <!-- ═════════ TELEGRAM ═════════ -->
     <section class="page" data-page="tg">
-      <div class="head"><div><h1>TG WS Proxy</h1><p>Локальный MTProto-прокси: ускоряет Telegram Desktop через WebSocket-соединения</p></div><div class="sp"></div>
+      <div class="head"><div><h1>TG WS Proxy</h1><p>Локальный MTProto-прокси: ускоряет Telegram через WebSocket-соединения</p></div><div class="sp"></div>
         <button class="btn" id="tgRestart"><svg data-i="refresh"></svg>Перезапустить</button><button class="btn" id="tgStopExt" title="Закрыть TgWsProxy, запущенный не из Zapret Hub"><svg data-i="x"></svg>Закрыть сторонний</button></div>
       <div id="tgNotInstalled"></div>
-      <div class="grid g2">
+      <div class="glass card" id="lanCard">
+        <div class="row"><h3><svg data-i="phone"></svg>Раздача на телефон по Wi-Fi</h3><span id="lanChip"></span></div>
+        <div class="sub">Telegram на телефоне, планшете или другом ПК подключится к прокси этого компьютера</div>
+        <div id="lanBody"></div>
+      </div>
+      <div class="grid g2 mt">
         <div class="glass card">
           <h3><svg data-i="sliders"></svg>Подключение</h3>
           <div class="grid g2 mt">
@@ -433,7 +498,7 @@ pre.raw{font-family:var(--mono);font-size:12px;line-height:1.55;white-space:pre-
           </div>
           <label class="field mt"><span>Secret (32 hex)</span><div class="row"><input class="input mono grow" id="cfSecret"><button class="btn icon" id="cfRegen" title="Сгенерировать новый"><svg data-i="dice"></svg></button></div></label>
           <label class="field mt"><span>DC → IP (по одному в строке)</span><textarea class="input" id="cfDc" rows="3" spellcheck="false"></textarea></label>
-          <div class="small muted mts">Адрес 0.0.0.0 — прокси будет доступен другим устройствам в локальной сети.</div>
+          <div class="small muted mts">Адрес 0.0.0.0 — прокси доступен другим устройствам в локальной сети. Удобнее включить раздачу кнопкой выше.</div>
         </div>
         <div class="glass card">
           <h3><svg data-i="cloud"></svg>Cloudflare и производительность</h3>
@@ -463,10 +528,53 @@ pre.raw{font-family:var(--mono);font-size:12px;line-height:1.55;white-space:pre-
       </div>
     </section>
 
+    <!-- ═════════ AUTOMATION ═════════ -->
+    <section class="page" data-page="auto">
+      <div class="head"><div><h1>Автоматика</h1><p>Фоновая проверка связи, самовосстановление и своя стратегия для каждой сети</p></div></div>
+      <div class="grid g2">
+        <div class="glass card">
+          <h3><svg data-i="pulse"></svg>Проверка связи</h3>
+          <div class="opt"><div class="grow"><div class="t">Проверять связь в фоне</div><div class="d">Discord и YouTube; результаты попадают в историю</div></div><label class="switch"><input type="checkbox" data-set="MonitorEnabled"><i></i></label></div>
+          <div class="opt"><div class="grow"><div class="t">Интервал</div></div><select class="input" style="width:150px" data-sel="MonitorInterval"><option value="5">5 мин</option><option value="10">10 мин</option><option value="15">15 мин</option><option value="30">30 мин</option><option value="60">60 мин</option></select></div>
+          <div class="opt"><div class="grow"><div class="t">Проверять голос Discord (UDP)</div><div class="d">Запрос к голосовым серверам Discord, как перед звонком. Учитывается и в поиске ALT.</div></div><label class="switch"><input type="checkbox" data-set="CheckVoice"><i></i></label></div>
+          <div class="row mt"><span class="small muted grow" id="monLast">Ещё не проверялось</span><button class="btn sm" id="monNow"><svg data-i="play"></svg>Проверить сейчас</button></div>
+        </div>
+        <div class="glass card">
+          <h3><svg data-i="heal"></svg>Самовосстановление</h3>
+          <div class="opt"><div class="grow"><div class="t">Восстанавливать связь автоматически</div><div class="d">Если Discord или YouTube перестали открываться, Zapret Hub проверит лучшие стратегии, переключится на рабочую и покажет уведомление</div></div><label class="switch"><input type="checkbox" data-set="SelfHeal"><i></i></label></div>
+          <div class="opt"><div class="grow"><div class="t">Сколько стратегий проверять</div><div class="d">Сначала лучшие по последнему поиску ALT</div></div><select class="input" style="width:150px" data-sel="SelfHealCandidates"><option value="3">3</option><option value="5">5</option><option value="8">8</option><option value="12">12</option></select></div>
+          <div class="small muted mt" id="healHint"></div>
+        </div>
+      </div>
+      <div class="glass card mt">
+        <h3><svg data-i="wifi"></svg>Профили сетей</h3><div class="sub">Дом, работа, телефон в режиме модема: у каждой сети своя стратегия</div>
+        <div class="opt"><div class="grow"><div class="t">Переключать стратегию при смене сети</div><div class="d">Стратегия, выбранная вручную или найденная самовосстановлением, запоминается для текущей сети</div></div><label class="switch"><input type="checkbox" data-set="NetProfilesEnabled"><i></i></label></div>
+        <div id="netCur" class="mt"></div>
+        <div class="list mt" id="netList"></div>
+      </div>
+    </section>
+
+    <!-- ═════════ HISTORY ═════════ -->
+    <section class="page" data-page="history">
+      <div class="head"><div><h1>История</h1><p>Когда и на какой стратегии связь была, а когда пропадала</p></div><div class="sp"></div>
+        <div class="seg" id="histRange"><button data-v="24" class="on">24 часа</button><button data-v="72">3 дня</button><button data-v="168">7 дней</button></div>
+        <button class="btn" id="histNow"><svg data-i="play"></svg>Проверить сейчас</button><button class="btn ghost icon" id="histClear" title="Очистить историю"><svg data-i="trash"></svg></button></div>
+      <div class="grid g4" id="histStats"></div>
+      <div class="glass card mt">
+        <div class="hist" id="histWrap"><div id="histChart"></div><div class="tip" id="histTip"></div></div>
+        <div class="legend mt" id="histLegend"></div>
+        <div class="small muted mts" id="histNote"></div>
+      </div>
+      <div class="glass card mt">
+        <h3><svg data-i="list"></svg>События</h3>
+        <div class="list mt" id="histEvents"></div>
+      </div>
+    </section>
+
     <!-- ═════════ DIAGNOSTICS ═════════ -->
     <section class="page" data-page="diag">
       <div class="head"><div><h1>Диагностика</h1><p>Конфликты, системные настройки и всё, что мешает обходу работать</p></div><div class="sp"></div>
-        <button class="btn" id="discordCache"><svg data-i="broom"></svg>Очистить кэш Discord</button><button class="btn pri" id="diagRun"><svg data-i="play"></svg>Запустить</button></div>
+        <button class="btn" id="discordCache"><svg data-i="broom"></svg>Очистить кэш Discord</button><button class="btn" id="diagFixAll" disabled><svg data-i="spark"></svg>Исправить всё</button><button class="btn pri" id="diagRun"><svg data-i="play"></svg>Запустить</button></div>
       <div class="glass card"><div class="list" id="diagList"><div class="empty"><svg data-i="stetho"></svg>Нажмите «Запустить», чтобы проверить систему</div></div></div>
     </section>
 
@@ -474,14 +582,15 @@ pre.raw{font-family:var(--mono);font-size:12px;line-height:1.55;white-space:pre-
     <section class="page" data-page="updates">
       <div class="head"><div><h1>Обновления</h1><p>Загрузка последних релизов прямо с GitHub. Пользовательские списки и настройки сохраняются.</p></div><div class="sp"></div>
         <button class="btn" id="updCheck"><svg data-i="refresh"></svg>Проверить</button></div>
-      <div class="grid g2">
+      <div class="grid g3u">
         <div class="glass card" id="updZ"></div>
         <div class="glass card" id="updT"></div>
+        <div class="glass card" id="updH"></div>
       </div>
       <div class="glass card mt">
         <h3><svg data-i="gear"></svg>Автоматически</h3>
-        <div class="opt"><div class="grow"><div class="t">Проверять обновления при запуске</div><div class="d">zapret-discord-youtube и tg-ws-proxy</div></div><label class="switch"><input type="checkbox" data-set="AutoCheckUpdates"><i></i></label></div>
-        <div class="opt"><div class="grow"><div class="t">Устанавливать обновления автоматически</div><div class="d">Обход и прокси будут перезапущены с прежней стратегией</div></div><label class="switch"><input type="checkbox" data-set="AutoInstallUpdates"><i></i></label></div>
+        <div class="opt"><div class="grow"><div class="t">Проверять обновления при запуске</div><div class="d">zapret-discord-youtube, tg-ws-proxy и сам Zapret Hub</div></div><label class="switch"><input type="checkbox" data-set="AutoCheckUpdates"><i></i></label></div>
+        <div class="opt"><div class="grow"><div class="t">Устанавливать обновления автоматически</div><div class="d">Обход и прокси будут перезапущены с прежней стратегией, Zapret Hub перезапустится сам</div></div><label class="switch"><input type="checkbox" data-set="AutoInstallUpdates"><i></i></label></div>
         <div class="opt"><div class="grow"><div class="t">Встроенная проверка обновлений в .bat-файлах zapret</div><div class="d">Открывает браузер при запуске .bat вручную, если вышла новая версия</div></div><label class="switch"><input type="checkbox" id="zCheckFlag"><i></i></label></div>
       </div>
     </section>
@@ -499,26 +608,41 @@ pre.raw{font-family:var(--mono);font-size:12px;line-height:1.55;white-space:pre-
       <div class="grid g2">
         <div class="glass card">
           <h3><svg data-i="gear"></svg>Приложение</h3>
+          <div class="opt"><div class="grow"><div class="t">Язык интерфейса</div></div><select class="input" style="width:170px" id="setLang"><option value="">Как в Windows</option><option value="ru">Русский</option><option value="en">English</option></select></div>
+          <div class="opt"><div class="grow"><div class="t">Горячая клавиша вкл/выкл обхода</div><div class="d" id="hkHint">Работает везде, даже когда окно скрыто</div></div><input class="input hk" style="width:170px" id="hkInput" readonly><button class="btn sm ghost icon" id="hkClear" title="Убрать"><svg data-i="x"></svg></button></div>
           <div class="opt"><div class="grow"><div class="t">Запускать вместе с Windows</div><div class="d">Через планировщик задач — без запроса UAC</div></div><label class="switch"><input type="checkbox" id="setAutostart"><i></i></label></div>
           <div class="opt"><div class="grow"><div class="t">Сворачивать в трей при закрытии</div><div class="d">Выход — через меню значка в трее</div></div><label class="switch"><input type="checkbox" data-set="MinimizeToTray"><i></i></label></div>
           <div class="opt"><div class="grow"><div class="t">Запускаться свёрнутым</div></div><label class="switch"><input type="checkbox" data-set="StartMinimized"><i></i></label></div>
-          <div class="opt"><div class="grow"><div class="t">Уведомления</div><div class="d">Обновления и окончание тестов</div></div><label class="switch"><input type="checkbox" data-set="Notifications"><i></i></label></div>
+          <div class="opt"><div class="grow"><div class="t">Уведомления</div><div class="d">Обновления, окончание тестов, самовосстановление</div></div><label class="switch"><input type="checkbox" data-set="Notifications"><i></i></label></div>
           <div class="opt"><div class="grow"><div class="t">Запускать последнюю стратегию при старте</div><div class="d">Для ручного режима. Служба запускается сама.</div></div><label class="switch"><input type="checkbox" data-set="ZapretAutoStart"><i></i></label></div>
           <div class="opt"><div class="grow"><div class="t">Запускать TG WS Proxy при старте</div></div><label class="switch"><input type="checkbox" data-set="TgAutoStart"><i></i></label></div>
         </div>
-        <div class="glass card">
-          <h3><svg data-i="folder"></svg>Папки</h3>
-          <label class="field mt"><span>zapret-discord-youtube</span><div class="row"><input class="input mono grow" id="dirZ" readonly><button class="btn icon" id="dirZPick" title="Выбрать"><svg data-i="folder"></svg></button><button class="btn icon" id="dirZOpen" title="Открыть"><svg data-i="external"></svg></button></div></label>
-          <div class="small muted mts">Можно указать уже распакованный zapret — Zapret Hub подхватит его.</div>
-          <label class="field mt"><span>tg-ws-proxy</span><div class="row"><input class="input mono grow" id="dirT" readonly><button class="btn icon" id="dirTPick" title="Выбрать"><svg data-i="folder"></svg></button><button class="btn icon" id="dirTOpen" title="Открыть"><svg data-i="external"></svg></button></div></label>
-          <hr class="soft">
-          <div class="row wrap"><button class="btn sm" id="openData"><svg data-i="folder"></svg>Данные приложения</button><button class="btn sm danger" id="quitApp"><svg data-i="power"></svg>Выйти из Zapret Hub</button></div>
+        <div class="col">
+          <div class="glass card">
+            <h3><svg data-i="folder"></svg>Папки</h3>
+            <label class="field mt"><span>zapret-discord-youtube</span><div class="row"><input class="input mono grow" id="dirZ" readonly><button class="btn icon" id="dirZPick" title="Выбрать"><svg data-i="folder"></svg></button><button class="btn icon" id="dirZOpen" title="Открыть"><svg data-i="external"></svg></button></div></label>
+            <div class="small muted mts">Можно указать уже распакованный zapret — Zapret Hub подхватит его.</div>
+            <label class="field mt"><span>tg-ws-proxy</span><div class="row"><input class="input mono grow" id="dirT" readonly><button class="btn icon" id="dirTPick" title="Выбрать"><svg data-i="folder"></svg></button><button class="btn icon" id="dirTOpen" title="Открыть"><svg data-i="external"></svg></button></div></label>
+            <hr class="soft">
+            <div class="row wrap"><button class="btn sm" id="openData"><svg data-i="folder"></svg>Данные приложения</button><button class="btn sm danger" id="quitApp"><svg data-i="power"></svg>Выйти из Zapret Hub</button></div>
+          </div>
+          <div class="glass card">
+            <h3><svg data-i="download"></svg>Установка</h3>
+            <div id="instBox"></div>
+          </div>
         </div>
+      </div>
+      <div class="glass card mt">
+        <h3><svg data-i="archive"></svg>Перенос и поддержка</h3>
+        <div class="opt"><div class="grow"><div class="t">Экспорт настроек</div><div class="d">Настройки, свои списки доменов, свои стратегии и конфиг TG-прокси в одном файле .zhub</div></div><button class="btn sm" id="expBtn"><svg data-i="upload"></svg>Экспорт</button></div>
+        <div class="opt"><div class="grow"><div class="t">Импорт настроек</div><div class="d">Перенос с другого ПК. Папки утилит на этом компьютере не меняются.</div></div><button class="btn sm" id="impBtn"><svg data-i="download"></svg>Импорт</button></div>
+        <div class="opt"><div class="grow"><div class="t">Отчёт для баг-репорта</div><div class="d">Архив с журналами, диагностикой и состоянием. Secret прокси и названия сетей вырезаются.</div></div><button class="btn sm" id="repBtn"><svg data-i="bug"></svg>Собрать отчёт</button></div>
       </div>
       <div class="glass card mt">
         <h3><svg data-i="info"></svg>О программе</h3>
         <div class="sub sel" id="about"></div>
         <div class="row mt wrap">
+          <button class="btn sm ghost" data-url="https://github.com/prokrastinaciya/ZapretHub">Zapret Hub</button>
           <button class="btn sm ghost" data-url="https://github.com/Flowseal/zapret-discord-youtube">zapret-discord-youtube</button>
           <button class="btn sm ghost" data-url="https://github.com/Flowseal/tg-ws-proxy">tg-ws-proxy</button>
           <button class="btn sm ghost" data-url="https://github.com/bol-van/zapret">bol-van/zapret</button>
@@ -533,6 +657,500 @@ pre.raw{font-family:var(--mono);font-size:12px;line-height:1.55;white-space:pre-
 
 <script>
 "use strict";
+/* ───────── i18n ───────── */
+const LANG=document.documentElement.lang==='en'?'en':'ru';
+/** Russian source string → English. {0}, {1} are placeholders. */
+const EN={
+"Запрет запретам": "Ban the bans",
+"Свернуть": "Minimize",
+"Развернуть": "Maximize",
+"Закрыть": "Close",
+"Обзор": "Overview",
+"Обход блокировок Discord / YouTube и прокси для Telegram — в одном месте": "Discord / YouTube unblocking and a Telegram proxy — all in one place",
+"Проверить связь": "Check connection",
+"Включить / выключить обход": "Turn the bypass on / off",
+"Перезапустить": "Restart",
+"Включить / выключить прокси": "Turn the proxy on / off",
+"Скопировать": "Copy",
+"Подключить Telegram": "Connect Telegram",
+"На телефон": "To phone",
+"Быстрые действия": "Quick actions",
+"Найти рабочий ALT": "Find a working ALT",
+"Диагностика": "Diagnostics",
+"Проверить обновления": "Check for updates",
+"Обновить IPSet": "Update IPSet",
+"Последние события": "Recent events",
+"Весь журнал": "Full log",
+"Стратегии zapret": "zapret strategies",
+"Запуск вручную или установка службой Windows (работает без Zapret Hub и стартует вместе с системой)": "Run manually or install as a Windows service (works without Zapret Hub and starts with the system)",
+"Поиск…": "Search…",
+"Создать стратегию": "New strategy",
+"Удалить службы": "Remove services",
+"Обход для игр и прочих портов (1024–65535)": "Bypass for games and other ports (1024–65535)",
+"Выкл": "Off",
+"Порты TCP": "TCP ports",
+"Порты UDP": "UDP ports",
+"Применить": "Apply",
+"Стратегия будет перезапущена": "The strategy will be restarted",
+"IPSet-фильтр": "IPSet filter",
+"Какие IP-адреса обрабатывать в общих правилах": "Which IP addresses the general rules handle",
+"Список (loaded)": "List (loaded)",
+"Отключён (none)": "Off (none)",
+"Все IP (any)": "All IPs (any)",
+"Обновить список": "Update list",
+"Активные фейки": "Active fakes",
+"Файлы-пустышки для обхода UDP (Discord-звонки и игры)": "Decoy files for UDP bypass (Discord calls and games)",
+"Файл hosts": "hosts file",
+"IP-адреса Discord/GitHub из репозитория для обхода DNS-блокировок": "Discord/GitHub IP addresses from the repository to bypass DNS blocking",
+"Не проверялся": "Not checked",
+"Проверить": "Check",
+"Убрать блок": "Remove block",
+"Списки доменов и IP": "Domain and IP lists",
+"Сохранить": "Save",
+"Редактор стратегии": "Strategy editor",
+"Соберите набор аргументов winws в форме и сохраните его как новую стратегию": "Build a set of winws arguments in a form and save it as a new strategy",
+"К стратегиям": "Back to strategies",
+"Стратегия": "Strategy",
+"Название": "Name",
+"Мой провайдер": "My provider",
+"Взять за основу": "Start from",
+"Загрузить": "Load",
+"Своя стратегия хранится рядом с остальными как": "Your strategy is stored next to the others as",
+"и не удаляется при обновлении zapret.": "and is kept when zapret updates.",
+"Перехват WinDivert": "WinDivert capture",
+"Какие порты winws вообще забирает на обработку (--wf-tcp / --wf-udp)": "Which ports winws captures for processing at all (--wf-tcp / --wf-udp)",
+"и": "and",
+"подставляются из настроек Game Filter.": "are taken from the Game Filter settings.",
+"Блоки правил": "Rule blocks",
+"Добавить блок": "Add block",
+"Каждый блок — отдельный профиль winws (разделяются --new): фильтр трафика и способ обхода для него": "Each block is a separate winws profile (separated by --new): a traffic filter and the way to bypass it",
+"Аргументы winws": "winws arguments",
+"Сохранить и проверить": "Save and test",
+"Сохранить и запустить": "Save and run",
+"Удалить": "Delete",
+"Поиск рабочего ALT": "Find a working ALT",
+"Каждая стратегия запускается по очереди и проверяется запросами к Discord, YouTube, Google, Cloudflare": "Each strategy is started in turn and checked with requests to Discord, YouTube, Google, Cloudflare",
+"Параметры теста": "Test settings",
+"Стандартный": "Standard",
+"Свой сайт": "Custom site",
+"Стратегии": "Strategies",
+"Все": "All",
+"Ни одной": "None",
+"Начать тест": "Start test",
+"Остановить": "Stop",
+"Свежие стратегии из репозитория": "Fresh strategies from the repository",
+"Новые и изменённые ALT из ветки main — ещё до выхода релиза": "New and changed ALTs from the main branch — before they reach a release",
+"Загрузить отмеченные": "Download selected",
+"Результаты": "Results",
+"Локальный MTProto-прокси: ускоряет Telegram через WebSocket-соединения": "Local MTProto proxy: speeds up Telegram through WebSocket connections",
+"Закрыть TgWsProxy, запущенный не из Zapret Hub": "Close a TgWsProxy that was not started by Zapret Hub",
+"Закрыть сторонний": "Close external",
+"Раздача на телефон по Wi-Fi": "Share to your phone over Wi-Fi",
+"Telegram на телефоне, планшете или другом ПК подключится к прокси этого компьютера": "Telegram on a phone, tablet or another PC will connect to this computer's proxy",
+"Подключение": "Connection",
+"Адрес": "Address",
+"Порт": "Port",
+"Сгенерировать новый": "Generate a new one",
+"DC → IP (по одному в строке)": "DC → IP (one per line)",
+"Адрес 0.0.0.0 — прокси доступен другим устройствам в локальной сети. Удобнее включить раздачу кнопкой выше.": "Address 0.0.0.0 makes the proxy reachable from other devices on the local network. Sharing is easier with the button above.",
+"Cloudflare и производительность": "Cloudflare and performance",
+"Резерв через Cloudflare-прокси": "Fallback through the Cloudflare proxy",
+"Если прямое WS-подключение к DC не работает": "If a direct WS connection to the DC does not work",
+"HTTP/2 для CF-прокси": "HTTP/2 for the CF proxy",
+"Мультиплексирование соединений": "Connection multiplexing",
+"Свой домен CF-прокси": "Own CF proxy domain",
+"Домены через запятую": "Comma-separated domains",
+"Свой Cloudflare Worker (домены через запятую)": "Your own Cloudflare Worker (comma-separated domains)",
+"Буфер, КБ": "Buffer, KB",
+"Пул WS": "WS pool",
+"Лог, МБ": "Log, MB",
+"Подробный журнал": "Verbose log",
+"verbose — для поиска проблем": "verbose — for troubleshooting",
+"Сохранить и применить": "Save and apply",
+"Прокси перезапустится автоматически": "The proxy restarts automatically",
+"Доступность дата-центров Telegram": "Telegram data center availability",
+"TLS + WebSocket-рукопожатие к kwsN.web.telegram.org — так же, как это делает сам прокси": "TLS + WebSocket handshake to kwsN.web.telegram.org — exactly as the proxy does it",
+"Журнал прокси": "Proxy log",
+"Открыть файл": "Open file",
+"Автоматика": "Automation",
+"Фоновая проверка связи, самовосстановление и своя стратегия для каждой сети": "Background connectivity check, self-healing and a strategy for each network",
+"Проверка связи": "Connectivity check",
+"Проверять связь в фоне": "Check the connection in the background",
+"Discord и YouTube; результаты попадают в историю": "Discord and YouTube; results go to the history",
+"Интервал": "Interval",
+"5 мин": "5 min",
+"10 мин": "10 min",
+"15 мин": "15 min",
+"30 мин": "30 min",
+"60 мин": "60 min",
+"Проверять голос Discord (UDP)": "Check Discord voice (UDP)",
+"Запрос к голосовым серверам Discord, как перед звонком. Учитывается и в поиске ALT.": "A request to Discord voice servers, like the one before a call. Also counted in the ALT search.",
+"Ещё не проверялось": "Not checked yet",
+"Проверить сейчас": "Check now",
+"Самовосстановление": "Self-healing",
+"Восстанавливать связь автоматически": "Restore the connection automatically",
+"Если Discord или YouTube перестали открываться, Zapret Hub проверит лучшие стратегии, переключится на рабочую и покажет уведомление": "If Discord or YouTube stops opening, Zapret Hub tests the best strategies, switches to a working one and shows a notification",
+"Сколько стратегий проверять": "How many strategies to test",
+"Сначала лучшие по последнему поиску ALT": "Best ones from the last ALT search first",
+"Профили сетей": "Network profiles",
+"Дом, работа, телефон в режиме модема: у каждой сети своя стратегия": "Home, work, phone hotspot: each network gets its own strategy",
+"Переключать стратегию при смене сети": "Switch the strategy when the network changes",
+"Стратегия, выбранная вручную или найденная самовосстановлением, запоминается для текущей сети": "A strategy picked by hand or found by self-healing is remembered for the current network",
+"История": "History",
+"Когда и на какой стратегии связь была, а когда пропадала": "When and on which strategy the connection worked, and when it went down",
+"24 часа": "24 hours",
+"3 дня": "3 days",
+"7 дней": "7 days",
+"Очистить историю": "Clear history",
+"События": "Events",
+"Конфликты, системные настройки и всё, что мешает обходу работать": "Conflicts, system settings and everything else that keeps the bypass from working",
+"Очистить кэш Discord": "Clear Discord cache",
+"Исправить всё": "Fix all",
+"Запустить": "Run",
+"Нажмите «Запустить», чтобы проверить систему": "Press “Run” to check the system",
+"Обновления": "Updates",
+"Загрузка последних релизов прямо с GitHub. Пользовательские списки и настройки сохраняются.": "Latest releases straight from GitHub. Your lists and settings are kept.",
+"Автоматически": "Automatically",
+"Проверять обновления при запуске": "Check for updates on startup",
+"zapret-discord-youtube, tg-ws-proxy и сам Zapret Hub": "zapret-discord-youtube, tg-ws-proxy and Zapret Hub itself",
+"Устанавливать обновления автоматически": "Install updates automatically",
+"Обход и прокси будут перезапущены с прежней стратегией, Zapret Hub перезапустится сам": "The bypass and the proxy restart with the same strategy, Zapret Hub restarts itself",
+"Встроенная проверка обновлений в .bat-файлах zapret": "Built-in update check in zapret .bat files",
+"Открывает браузер при запуске .bat вручную, если вышла новая версия": "Opens a browser when a .bat is run by hand and a new version is out",
+"Журнал": "Log",
+"События Zapret Hub и вывод winws.exe": "Zapret Hub events and winws.exe output",
+"Настройки": "Settings",
+"Поведение приложения и расположение утилит": "App behavior and tool locations",
+"Приложение": "App",
+"Язык интерфейса": "Interface language",
+"Как в Windows": "Same as Windows",
+"Русский": "Русский",
+"Горячая клавиша вкл/выкл обхода": "Bypass on/off hotkey",
+"Работает везде, даже когда окно скрыто": "Works everywhere, even when the window is hidden",
+"Убрать": "Remove",
+"Запускать вместе с Windows": "Start with Windows",
+"Через планировщик задач — без запроса UAC": "Through Task Scheduler — no UAC prompt",
+"Сворачивать в трей при закрытии": "Minimize to tray on close",
+"Выход — через меню значка в трее": "Quit from the tray icon menu",
+"Запускаться свёрнутым": "Start minimized",
+"Уведомления": "Notifications",
+"Обновления, окончание тестов, самовосстановление": "Updates, finished tests, self-healing",
+"Запускать последнюю стратегию при старте": "Start the last strategy on launch",
+"Для ручного режима. Служба запускается сама.": "For manual mode. The service starts by itself.",
+"Запускать TG WS Proxy при старте": "Start TG WS Proxy on launch",
+"Папки": "Folders",
+"Выбрать": "Choose",
+"Открыть": "Open",
+"Можно указать уже распакованный zapret — Zapret Hub подхватит его.": "You can point to an already extracted zapret — Zapret Hub will pick it up.",
+"Данные приложения": "App data",
+"Выйти из Zapret Hub": "Quit Zapret Hub",
+"Установка": "Installation",
+"Перенос и поддержка": "Transfer and support",
+"Экспорт настроек": "Export settings",
+"Настройки, свои списки доменов, свои стратегии и конфиг TG-прокси в одном файле .zhub": "Settings, your domain lists, your strategies and the TG proxy config in a single .zhub file",
+"Экспорт": "Export",
+"Импорт настроек": "Import settings",
+"Перенос с другого ПК. Папки утилит на этом компьютере не меняются.": "Move from another PC. Tool folders on this computer stay as they are.",
+"Импорт": "Import",
+"Отчёт для баг-репорта": "Bug report",
+"Архив с журналами, диагностикой и состоянием. Secret прокси и названия сетей вырезаются.": "An archive with logs, diagnostics and state. The proxy secret and network names are removed.",
+"Собрать отчёт": "Create report",
+"О программе": "About",
+"Ошибка": "Error",
+"Продолжить": "Continue",
+"Отмена": "Cancel",
+"Поиск ALT": "ALT search",
+"Обход": "Bypass",
+"Прокси": "Proxy",
+"выключен": "off",
+"не установлен": "not installed",
+"служба": "service",
+"работает": "running",
+"Установите zapret на вкладке «Обновления»": "Install zapret on the Updates page",
+"Работает как служба Windows: ": "Running as a Windows service: ",
+"Запущен вручную: ": "Started manually: ",
+"Выберите стратегию и нажмите на кнопку": "Pick a strategy and press the button",
+"выкл": "off",
+"запуск…": "starting…",
+"порт не отвечает": "port not responding",
+"сторонний экземпляр": "external instance",
+"Установите прокси на вкладке «Обновления»": "Install the proxy on the Updates page",
+"Слушает {0}:{1} — MTProto": "Listening on {0}:{1} — MTProto",
+" • раздаётся по Wi-Fi": " • shared over Wi-Fi",
+"Нажмите на кнопку, чтобы запустить прокси": "Press the button to start the proxy",
+"TG WS Proxy не установлен.": "TG WS Proxy is not installed.",
+"Zapret Hub скачает последнюю версию с GitHub.": "Zapret Hub will download the latest version from GitHub.",
+"Установить": "Install",
+"Обход остановлен": "Bypass stopped",
+"Запущена стратегия {0}": "Started strategy {0}",
+"Переключено на {0}": "Switched to {0}",
+"Перезапущено": "Restarted",
+"Прокси запущен. Нажмите «Подключить Telegram».": "Proxy started. Press “Connect Telegram”.",
+"Ссылка скопирована": "Link copied",
+"Открываю Telegram…": "Opening Telegram…",
+"IPSet-список обновлён": "IPSet list updated",
+"Установить Zapret Hub в систему?": "Install Zapret Hub on this PC?",
+"Появятся ярлыки в «Пуске» и деинсталлятор. Portable-версией можно пользоваться и дальше.": "You get Start menu shortcuts and an uninstaller. The portable version keeps working too.",
+"Не надо": "No thanks",
+"Голос Discord": "Discord voice",
+"Не проверялось": "Not checked",
+"Проверка…": "Checking…",
+"Нет данных": "No data",
+"Проверка выключена": "Check is off",
+"UDP: {0} мс": "UDP: {0} ms",
+"Серверы не отвечают": "Servers not responding",
+"Нет интернета": "No internet",
+"Доступно": "Available",
+"Недоступно": "Unavailable",
+"Частично: {0}%": "Partly: {0}%",
+"проверяю {0} ({1}/{2})": "testing {0} ({1}/{2})",
+"подготовка…": "preparing…",
+"Пока пусто": "Nothing yet",
+"Журнал пуст. Он заполняется, когда стратегия запущена вручную через Zapret Hub (служба пишет в журнал событий Windows).": "The log is empty. It fills up when a strategy is started manually through Zapret Hub (the service writes to the Windows event log).",
+"zapret ещё не установлен": "zapret is not installed yet",
+"своя": "own",
+"активна": "active",
+"Установить службой Windows (автозапуск)": "Install as a Windows service (autostart)",
+"Служба": "Service",
+"Изменить": "Edit",
+"Создать на основе этой": "New strategy based on this one",
+"Запущена {0}": "Started {0}",
+"Установить службу?": "Install the service?",
+"Стратегия <b>{0}</b> будет работать как служба Windows и запускаться автоматически при старте системы — даже без Zapret Hub.": "Strategy <b>{0}</b> will run as a Windows service and start automatically with the system — even without Zapret Hub.",
+"Служба установлена": "Service installed",
+"Удалить стратегию?": "Delete the strategy?",
+"Файл <b>{0}</b> будет удалён.": "The file <b>{0}</b> will be deleted.",
+"Стратегия удалена": "Strategy deleted",
+"Удалить службы?": "Remove the services?",
+"Будут остановлены и удалены службы <b>zapret</b> и <b>WinDivert</b>, а также завершён winws.exe.": "The <b>zapret</b> and <b>WinDivert</b> services will be stopped and removed, and winws.exe will be closed.",
+"Службы удалены": "Services removed",
+"Обрабатываются IP из списка ipset-all.txt (рекомендуется).": "IPs from ipset-all.txt are processed (recommended).",
+"IPSet отключён: обрабатываются только домены из списков.": "IPSet is off: only domains from the lists are processed.",
+"Обрабатываются все IP — максимальный охват, но возможны побочные эффекты.": "All IPs are processed — maximum coverage, but side effects are possible.",
+"Файл ipset-all.txt не найден — обновите список.": "ipset-all.txt not found — update the list.",
+"Game Filter применён": "Game Filter applied",
+"Список обновлён": "List updated",
+"Фейк Discord заменён": "Discord fake replaced",
+"Фейк GameFilter заменён": "GameFilter fake replaced",
+"актуален": "up to date",
+"все {0} записей на месте": "all {0} entries are in place",
+"не хватает {0} из {1}": "{0} of {1} missing",
+"есть записи YouTube": "has YouTube entries",
+"Изменить файл hosts?": "Change the hosts file?",
+"В системный файл hosts будет добавлен блок записей из репозитория zapret-discord-youtube (старый блок Zapret Hub заменится). Резервная копия сохранится в данных приложения.\n\nАнтивирус может предупредить об изменении hosts.": "A block of entries from the zapret-discord-youtube repository will be added to the system hosts file (the old Zapret Hub block is replaced). A backup is kept in the app data.\\n\\nYour antivirus may warn about the hosts change.",
+"hosts обновлён": "hosts updated",
+"Блок удалён": "Block removed",
+"Мои домены": "My domains",
+"Домены, которые нужно обходить (по одному в строке). Поддомены включаются автоматически.": "Domains to unblock (one per line). Subdomains are included automatically.",
+"Исключения": "Exclusions",
+"Домены, которые нельзя трогать.": "Domains that must not be touched.",
+"Исключённые IP": "Excluded IPs",
+"IP/подсети, исключённые из обработки.": "IPs/subnets excluded from processing.",
+"Встроенный список (перезаписывается при обновлении zapret).": "Built-in list (overwritten when zapret updates).",
+"Домены Google/YouTube (перезаписывается при обновлении).": "Google/YouTube domains (overwritten on update).",
+"Цели тестов": "Test targets",
+"Адреса для «Поиска ALT». Формат: Имя = \"https://host\" или Имя = \"PING:1.1.1.1\".": "Addresses for the ALT search. Format: Name = \"https://host\" or Name = \"PING:1.1.1.1\".",
+"Сохранено": "Saved",
+"пустой блок": "empty block",
+"Блок {0}": "Block {0}",
+"Выше": "Up",
+"Ниже": "Down",
+"Удалить блок": "Remove block",
+"Протокол": "Protocol",
+"Порты": "Ports",
+"Протокол L7": "L7 protocol",
+"Списки доменов (--hostlist)": "Domain lists (--hostlist)",
+"Домены вручную (--hostlist-domains)": "Domains by hand (--hostlist-domains)",
+"Стандартные исключения": "Standard exclusions",
+"Метод обхода (--dpi-desync)": "Bypass method (--dpi-desync)",
+"Повторы фейков": "Fake repeats",
+"Позиция разреза": "Split position",
+"Обман DPI (--dpi-desync-fooling)": "DPI fooling (--dpi-desync-fooling)",
+"Фейковый TLS ClientHello": "Fake TLS ClientHello",
+"Фейковый QUIC": "Fake QUIC",
+"Любой протокол": "Any protocol",
+"Прочие параметры": "Other parameters",
+"Сначала установите zapret": "Install zapret first",
+"— пустая —": "— empty —",
+"Скопировано": "Copied",
+"Введите название": "Enter a name",
+"Перезаписать?": "Overwrite?",
+"Стратегия <b>{0}</b> уже есть.": "Strategy <b>{0}</b> already exists.",
+"Перезаписать": "Overwrite",
+"Сохранено: {0}": "Saved: {0}",
+"HTTP/1.1, TLS 1.2 и TLS 1.3 к каждой цели из targets.txt + ping, плюс голос Discord (UDP). Занимает ~10 с на стратегию.": "HTTP/1.1, TLS 1.2 and TLS 1.3 to every target from targets.txt + ping, plus Discord voice (UDP). Takes ~10 s per strategy.",
+"Проверка «заморозки» на 16–20 КБ (типичная блокировка ТСПУ) на наборе хостов hyperion-cs/dpi-checkers. IPSet на время теста переводится в any.": "Checks the 16–20 KB “freeze” (a typical TSPU block) on the hyperion-cs/dpi-checkers host set. IPSet is switched to any for the test.",
+"Введите адрес сайта: каждая стратегия будет проверена запросами HTTP/1.1, TLS 1.2 и TLS 1.3 к нему. Не забудьте добавить домен в «Мои домены», если он не входит в списки zapret.": "Enter a site address: every strategy is checked with HTTP/1.1, TLS 1.2 and TLS 1.3 requests to it. Add the domain to “My domains” if it is not in the zapret lists.",
+"Нет стратегий": "No strategies",
+"Отметьте хотя бы одну стратегию": "Select at least one strategy",
+"Введите адрес сайта": "Enter a site address",
+"Начать тест?": "Start the test?",
+"Будет проверено стратегий: <b>{0}</b> (~{1} мин).": "Strategies to test: <b>{0}</b> (~{1} min).",
+"На время теста текущий обход будет приостановлен, а после — восстановлен автоматически. Интернет в это время может работать нестабильно.": "The current bypass is paused for the test and restored automatically afterwards. The internet may be unstable meanwhile.",
+"(служба zapret тоже)": "(the zapret service too)",
+"Начать": "Start",
+"Проверяется <b>{0}</b>": "Testing <b>{0}</b>",
+"только что": "just now",
+"Какие стратегии открывают {0}": "Which strategies open {0}",
+"Запустите тест, чтобы найти лучшую стратегию для вашего провайдера": "Run a test to find the best strategy for your provider",
+"Сайт открывается со стратегиями: {0} из {1}": "The site opens with {0} of {1} strategies",
+"Ни одна стратегия не открыла сайт полностью": "No strategy opened the site completely",
+"Проверьте, что домен есть в «Моих доменах», и попробуйте режим IPSet any.": "Make sure the domain is in “My domains” and try IPSet mode any.",
+"Запустить лучшую": "Run the best",
+"Лучший результат: {0}": "Best result: {0}",
+"{0}/{1} успешных проверок": "{0}/{1} checks passed",
+", ping {0} мс": ", ping {0} ms",
+"Как служба": "As a service",
+"{0}/{1} успешно": "{0}/{1} passed",
+"{0} блокировок 16-20KB": "{0} blocks at 16-20KB",
+"ping ~{0} мс": "ping ~{0} ms",
+"качество": "quality",
+"Подробности": "Details",
+"<b>{0}</b> будет запускаться вместе с Windows.": "<b>{0}</b> will start with Windows.",
+"новая": "new",
+"изменена": "changed",
+"актуальна": "up to date",
+"только локально": "local only",
+"Ничего не найдено": "Nothing found",
+"Все стратегии актуальны": "All strategies are up to date",
+"Загружено стратегий: {0}": "Strategies downloaded: {0}",
+"Новый secret?": "New secret?",
+"После смены secret Telegram нужно будет переподключить по новой ссылке.": "After changing the secret, Telegram has to be reconnected with the new link.",
+"Сгенерировать": "Generate",
+"Secret обновлён": "Secret updated",
+"Прокси перезапущен": "Proxy restarted",
+"Все экземпляры TgWsProxy закрыты": "All TgWsProxy instances closed",
+"Журнал пуст": "The log is empty",
+"мс": "ms",
+"ошибка": "error",
+"Доступно {0} из {1} DC": "{0} of {1} DCs available",
+"раздаётся": "shared",
+"выключено": "off",
+"Сначала установите TG WS Proxy.": "Install TG WS Proxy first.",
+"Раздать по Wi-Fi": "Share over Wi-Fi",
+"Адрес этого ПК в сети: {0}": "This PC on the network: {0}",
+"Не найден адрес в локальной сети — подключитесь к Wi-Fi или кабелю": "No local network address found — connect to Wi-Fi or a cable",
+"Отсканируйте код камерой телефона — откроется Telegram с предложением подключить прокси. Телефон должен быть в той же сети, что и компьютер.": "Scan the code with your phone camera — Telegram opens and offers to add the proxy. The phone must be on the same network as the computer.",
+"Брандмауэр": "Firewall",
+"порт открыт": "port open",
+"правило не найдено": "rule not found",
+"Открыть порт": "Open port",
+"Правила, запрещающие входящие подключения к TgWsProxy.exe": "Rules that block incoming connections to TgWsProxy.exe",
+"блокирующих правил: {0}": "blocking rules: {0}",
+"Подключено устройств: {0}": "Devices connected: {0}",
+"+ этот компьютер": "+ this computer",
+"Этот компьютер": "This computer",
+"соединений: {0}": "connections: {0}",
+"Пока никто не подключён": "Nobody is connected yet",
+"Выключить раздачу": "Stop sharing",
+"Раздача выключена": "Sharing stopped",
+"Раздать прокси по Wi-Fi?": "Share the proxy over Wi-Fi?",
+"Прокси начнёт принимать подключения из локальной сети, а в брандмауэре Windows откроется порт {0} — только для устройств вашей подсети.\n\nСеть должна быть вашей: в публичном Wi-Fi прокси увидят посторонние.": "The proxy will accept connections from the local network, and port {0} will be opened in Windows Firewall — only for devices on your subnet.\\n\\nThe network must be yours: on public Wi-Fi strangers would see the proxy.",
+"Раздать": "Share",
+"Прокси раздаётся по Wi-Fi": "The proxy is shared over Wi-Fi",
+"Последняя проверка: {0} — Discord {1}%, YouTube {2}%": "Last check: {0} — Discord {1}%, YouTube {2}%",
+"голос": "voice",
+"нет интернета": "no internet",
+"Включите фоновую проверку связи — без неё самовосстановление не запускается.": "Turn on the background check — self-healing does not run without it.",
+"Перед переключением сбой подтверждается повторной проверкой через 20 секунд, а повторный запуск — не чаще раза в 15 минут.": "A failure is confirmed by a second check 20 seconds later before switching, and healing runs at most once every 15 minutes.",
+"— не задана —": "— not set —",
+"текущая сеть": "current network",
+"Сеть не определена": "Network not detected",
+"сохранённая сеть": "saved network",
+"Забыть сеть": "Forget network",
+"Других сохранённых сетей пока нет": "No other saved networks yet",
+"Очистить историю?": "Clear the history?",
+"Все записи проверок и событий будут удалены.": "All check records and events will be deleted.",
+"Очистить": "Clear",
+"Обход выключен": "Bypass off",
+"не отвечает": "not responding",
+"проверка в {0}": "checked at {0}",
+"вручную": "manual",
+"Работает": "Working",
+"Частично": "Partly",
+"Не работает": "Down",
+"Обход выключен или нет интернета": "Bypass off or no internet",
+"Смена стратегии": "Strategy change",
+"Сбой": "Failure",
+"Данные появятся после первой фоновой проверки (каждые {0} мин).": "Data appears after the first background check (every {0} min).",
+"Фоновая проверка выключена — включите её на вкладке «Автоматика».": "The background check is off — turn it on on the Automation page.",
+"Смен стратегии": "Strategy changes",
+"Событий за период нет": "No events in this period",
+"самовосстановление": "self-healing",
+"профиль сети": "network profile",
+"Пропала связь: {0} (на {1})": "Connection lost: {0} (on {1})",
+"Самовосстановление не нашло рабочую стратегию": "Self-healing found no working strategy",
+"Проблем: {0}, предупреждений: {1}": "Problems: {0}, warnings: {1}",
+"Всё в порядке": "All good",
+"Подробнее": "Details",
+"Исправить": "Fix",
+"Удалить конфликтующие службы?": "Remove conflicting services?",
+"Службы других программ обхода (GoodbyeDPI и т.п.) и драйвер WinDivert будут остановлены и удалены.": "Services of other bypass tools (GoodbyeDPI and the like) and the WinDivert driver will be stopped and removed.",
+"Готово": "Done",
+"Исправить всё?": "Fix everything?",
+"Будут выполнены действия:": "These actions will be performed:",
+"Службы других программ обхода и драйвер WinDivert будут удалены.": "Services of other bypass tools and the WinDivert driver will be removed.",
+"Очистить кэш Discord?": "Clear the Discord cache?",
+"Discord будет закрыт, папки Cache, Code Cache и GPUCache удалены (для Stable, PTB, Canary, Development).": "Discord will be closed and the Cache, Code Cache and GPUCache folders deleted (for Stable, PTB, Canary, Development).",
+"Доступны обновления: {0}": "Updates available: {0}",
+"Всё актуально": "Everything is up to date",
+"Доступно обновление {0}: {1} → {2}": "Update available for {0}: {1} → {2}",
+"Обновить": "Update",
+"Flowseal/zapret-discord-youtube • стратегии, списки, winws": "Flowseal/zapret-discord-youtube • strategies, lists, winws",
+"prokrastinaciya/ZapretHub • это приложение": "prokrastinaciya/ZapretHub • this app",
+"не проверялось": "not checked",
+"ошибка проверки": "check failed",
+"доступна {0}": "{0} available",
+"актуальная версия": "latest version",
+"Переустановить": "Reinstall",
+"Релиз": "Release",
+"Что нового": "What's new",
+"Подготовка…": "Preparing…",
+"Zapret Hub {0} установлен — перезапуск…": "Zapret Hub {0} installed — restarting…",
+"{0} {1} установлен": "{0} {1} installed",
+"не задана": "not set",
+"Сочетание занято другой программой — выберите другое": "The shortcut is taken by another app — pick a different one",
+"Установлено в": "Installed in",
+"Ярлыки — в меню «Пуск» и на рабочем столе. Удалить можно здесь или в «Параметры → Приложения».": "Shortcuts are in the Start menu and on the desktop. Uninstall here or in Settings → Apps.",
+"Удалить Zapret Hub": "Uninstall Zapret Hub",
+"Portable-версия:": "Portable version:",
+"В системе уже установлен Zapret Hub ({0}). Установка заменит его этой версией.": "Zapret Hub is already installed on this PC ({0}). Installing replaces it with this version.",
+"Установка скопирует приложение в {0}, добавит ярлыки в «Пуск» и на рабочий стол и деинсталлятор в «Приложения». Настройки сохранятся.": "Installing copies the app to {0}, adds shortcuts to the Start menu and the desktop and an uninstaller to Apps. Your settings are kept.",
+"Установить в систему": "Install on this PC",
+"Удалить Zapret Hub?": "Uninstall Zapret Hub?",
+"Откроется деинсталлятор: он закроет Zapret Hub и спросит, удалять ли также службы zapret и настройки.": "The uninstaller will close Zapret Hub and ask whether to also remove the zapret services and settings.",
+"Zapret Hub {0} — локальный менеджер для zapret-discord-youtube и tg-ws-proxy от Flowseal. Работает без серверов: всё, что приложение скачивает, берётся напрямую из GitHub-репозиториев проектов.": "Zapret Hub {0} is a local manager for zapret-discord-youtube and tg-ws-proxy by Flowseal. It works without servers: everything the app downloads comes straight from the projects' GitHub repositories.",
+"Данные": "Data",
+"Установить Zapret Hub?": "Install Zapret Hub?",
+"Приложение будет скопировано в Program Files, появятся ярлыки и деинсталлятор. Zapret Hub перезапустится из новой папки — обход и прокси продолжат работать.": "The app will be copied to Program Files with shortcuts and an uninstaller. Zapret Hub restarts from the new folder — the bypass and the proxy keep running.",
+"Установлено — перезапуск…": "Installed — restarting…",
+"Нажмите сочетание…": "Press a shortcut…",
+"Горячая клавиша убрана": "Hotkey removed",
+"Используйте букву, цифру или F1–F12": "Use a letter, a digit or F1–F12",
+"Добавьте Ctrl, Alt или Shift": "Add Ctrl, Alt or Shift",
+"Горячая клавиша: {0}": "Hotkey: {0}",
+"Папка zapret-discord-youtube": "zapret-discord-youtube folder",
+"Папка zapret: {0}": "zapret folder: {0}",
+"Папка для tg-ws-proxy": "Folder for tg-ws-proxy",
+"Папка прокси: {0}": "Proxy folder: {0}",
+"Выйти из Zapret Hub?": "Quit Zapret Hub?",
+"Служба zapret продолжит работать. Запущенные вручную winws и TG WS Proxy тоже продолжат работать в фоне.": "The zapret service keeps running. A manually started winws and TG WS Proxy keep running in the background too.",
+"Выйти": "Quit",
+"Отменено": "Cancelled",
+"Импортировано: {0}": "Imported: {0}",
+"Отчёт сохранён: {0}": "Report saved: {0}",
+"Доброй ночи": "Good night",
+"Доброе утро": "Good morning",
+"Добрый день": "Good afternoon",
+"Добрый вечер": "Good evening"
+};
+function t(s,...a){let r=LANG==='en'&&EN[s]!=null?EN[s]:s;a.forEach((v,i)=>{r=r.split('{'+i+'}').join(v)});return r}
+function translateDom(root){if(LANG!=='en')return;
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const nodes=[];while(w.nextNode())nodes.push(w.currentNode);
+  nodes.forEach(n=>{const s=n.nodeValue.trim();if(s&&EN[s]!=null)n.nodeValue=n.nodeValue.replace(s,EN[s])});
+  root.querySelectorAll('[title],[placeholder]').forEach(el=>{for(const at of ['title','placeholder']){const v=el.getAttribute(at);if(v&&EN[v]!=null)el.setAttribute(at,EN[v])}})}
+translateDom(document.body);
+
 /* ───────── icons ───────── */
 const IC={
  home:'<path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
@@ -541,6 +1159,7 @@ const IC={
  send:'<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/>',
  stetho:'<path d="M5 3v6a5 5 0 0 0 10 0V3"/><path d="M10 14v2a5 5 0 0 0 10 0v-3"/><circle cx="20" cy="11" r="2"/>',
  download:'<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>',
+ upload:'<path d="M12 21V9"/><path d="m7 14 5-5 5 5"/><path d="M5 3h14"/>',
  terminal:'<path d="m4 17 6-6-6-6"/><path d="M12 19h8"/>',
  gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
  power:'<path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.8 0"/>',
@@ -573,6 +1192,21 @@ const IC={
  youtube:'<rect x="2.5" y="5" width="19" height="14" rx="4"/><path d="m10 9 5 3-5 3z"/>',
  loader:'<path d="M12 3a9 9 0 1 0 9 9"/>',
  rocket:'<path d="M5 15c-1.5 1.5-2 5-2 5s3.5-.5 5-2"/><path d="M9 12a12 12 0 0 1 11-9 12 12 0 0 1-9 11z"/><path d="M9 12H5l2-4h5M12 15v4l4-2v-5"/>',
+ robot:'<rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4"/><circle cx="12" cy="3" r="1"/><circle cx="9" cy="14" r="1.3"/><circle cx="15" cy="14" r="1.3"/><path d="M2 13v3M22 13v3"/>',
+ chart:'<path d="M3 3v18h18"/><path d="m7 15 4-5 3 3 5-7"/>',
+ edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+ phone:'<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/>',
+ mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/>',
+ wifi:'<path d="M2 9a15 15 0 0 1 20 0"/><path d="M5 12.5a10 10 0 0 1 14 0"/><path d="M8.5 16a5 5 0 0 1 7 0"/><path d="M12 19.5h.01"/>',
+ cable:'<rect x="3" y="8" width="18" height="10" rx="2"/><path d="M7 18v3M17 18v3M8 12h8M8 8V5h8v3"/>',
+ heal:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/><path d="M12 9v6M9 12h6"/>',
+ archive:'<rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9"/><path d="M10 13h4"/>',
+ bug:'<rect x="8" y="6" width="8" height="14" rx="4"/><path d="M12 10v10M8 13H3M21 13h-5M8 17l-4 2M16 17l4 2M8 9 5 6M16 9l3-3M10 6l-1-3M14 6l1-3"/>',
+ back:'<path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ up:'<path d="m6 15 6-6 6 6"/>',
+ down:'<path d="m6 9 6 6 6-6"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
 };
 function svg(n,cls){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"${cls?` class="${cls}"`:''}>${IC[n]||''}</svg>`}
 function hydrate(root=document){root.querySelectorAll('svg[data-i]').forEach(s=>{s.outerHTML=svg(s.dataset.i)})}
@@ -580,39 +1214,99 @@ function hydrate(root=document){root.querySelectorAll('svg[data-i]').forEach(s=>
 /* ───────── helpers ───────── */
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const pretty=b=>{if(!b)return'—';let n=b.replace(/\.bat$/i,'');const m=n.match(/^general\s*\((.+)\)$/i);return m?m[1]:n};
+const pretty=b=>{if(!b)return'—';let n=b.replace(/\.bat$/i,'');const m=n.match(/^(?:general|custom)\s*\((.+)\)$/i);return m?m[1]:n};
+const isCustom=b=>/^custom \(.+\)\.bat$/i.test(b||'');
 let seq=0;const waiting=new Map();
 function api(cmd,args={}){return new Promise((res,rej)=>{const id=String(++seq);waiting.set(id,{res,rej});chrome.webview.postMessage({id,cmd,args})})}
 const handlers={};
 function on(evt,fn){(handlers[evt]=handlers[evt]||[]).push(fn)}
-chrome.webview.addEventListener('message',e=>{const m=e.data;if(m.id&&waiting.has(m.id)){const w=waiting.get(m.id);waiting.delete(m.id);m.ok?w.res(m.result):w.rej(new Error(m.error||'Ошибка'));return}
+chrome.webview.addEventListener('message',e=>{const m=e.data;if(m.id&&waiting.has(m.id)){const w=waiting.get(m.id);waiting.delete(m.id);m.ok?w.res(m.result):w.rej(new Error(m.error||t('Ошибка')));return}
   if(m.event)(handlers[m.event]||[]).forEach(f=>f(m.data))});
 
-function toast(msg,kind='info',ms=4200){const t=document.createElement('div');t.className='toast '+kind;
-  t.innerHTML=svg(kind==='ok'?'check':kind==='err'?'warn':'info')+`<div class="m">${esc(msg)}</div>`;$('#toasts').appendChild(t);
-  setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),300)},ms)}
+function toast(msg,kind='info',ms=4200){const el=document.createElement('div');el.className='toast '+kind;
+  el.innerHTML=svg(kind==='ok'?'check':kind==='err'?'warn':'info')+`<div class="m">${esc(msg)}</div>`;$('#toasts').appendChild(el);
+  setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),300)},ms)}
 function modal(title,body,buttons){return new Promise(res=>{$('#mTitle').textContent=title;$('#mBody').innerHTML=body;const a=$('#mActs');a.innerHTML='';
   buttons.forEach(b=>{const el=document.createElement('button');el.className='btn '+(b.cls||'');el.textContent=b.text;el.onclick=()=>{$('#modalBg').classList.remove('on');res(b.value)};a.appendChild(el)});
   $('#modalBg').classList.add('on')})}
-const confirmBox=(t,b,ok='Продолжить',cls='pri')=>modal(t,b,[{text:'Отмена',cls:'ghost',value:false},{text:ok,cls,value:true}]);
+const confirmBox=(title,body,ok=t('Продолжить'),cls='pri')=>modal(title,body,[{text:t('Отмена'),cls:'ghost',value:false},{text:ok,cls,value:true}]);
 /** Wraps a button click: shows spinner, reports errors as toasts. */
 async function run(btn,fn,okMsg){if(btn)btn.classList.add('busy');try{const r=await fn();if(okMsg)toast(typeof okMsg==='function'?okMsg(r):okMsg,'ok');return r}catch(e){toast(e.message,'err',7000)}finally{if(btn)btn.classList.remove('busy')}}
+const hhmm=ms=>{const d=new Date(ms);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
+const ddmm=ms=>{const d=new Date(ms);return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')};
+
+/* QR code encoder (byte mode, ECC level M), after Project Nayuki's reference implementation. */
+const QR=(()=>{
+ const ECC=[-1,10,16,26,18,24,16,18,22,22,26,30,22,22,24,24,28,28,26,26,26,26,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28];
+ const NB=[-1,1,1,1,2,2,4,4,4,5,5,5,8,9,9,10,10,11,13,14,16,17,17,18,20,21,23,25,26,28,29,31,33,35,37,38,40,43,45,47,49];
+ const raw=v=>{let r=(16*v+128)*v+64;if(v>=2){const n=Math.floor(v/7)+2;r-=(25*n-10)*n-55;if(v>=7)r-=36}return r};
+ const dataCw=v=>Math.floor(raw(v)/8)-ECC[v]*NB[v];
+ const mul=(x,y)=>{let z=0;for(let i=7;i>=0;i--){z=(z<<1)^((z>>>7)*0x11D);z^=((y>>>i)&1)*x}return z};
+ function divisor(d){const r=new Array(d).fill(0);r[d-1]=1;let root=1;for(let i=0;i<d;i++){for(let j=0;j<d;j++){r[j]=mul(r[j],root);if(j+1<d)r[j]^=r[j+1]}root=mul(root,2)}return r}
+ function rem(data,div){const r=div.map(()=>0);for(const b of data){const f=b^r.shift();r.push(0);div.forEach((c,i)=>r[i]^=mul(c,f))}return r}
+ const bit=(x,i)=>((x>>>i)&1)!==0;
+ function encode(text){
+  const bytes=[...new TextEncoder().encode(text)];
+  let v=1;for(;v<=40;v++)if(4+(v<10?8:16)+bytes.length*8<=dataCw(v)*8)break;
+  if(v>40)throw new Error('QR: data too long');
+  const bb=[];const app=(val,len)=>{for(let i=len-1;i>=0;i--)bb.push((val>>>i)&1)};
+  app(4,4);app(bytes.length,v<10?8:16);bytes.forEach(b=>app(b,8));
+  const cap=dataCw(v)*8;app(0,Math.min(4,cap-bb.length));app(0,(8-bb.length%8)%8);
+  for(let p=0xEC;bb.length<cap;p^=0xEC^0x11)app(p,8);
+  const data=[];for(let i=0;i<bb.length;i+=8){let b=0;for(let j=0;j<8;j++)b=(b<<1)|bb[i+j];data.push(b)}
+  // error correction and interleaving
+  const nb=NB[v],el=ECC[v],rc=Math.floor(raw(v)/8),ns=nb-rc%nb,sl=Math.floor(rc/nb),dv=divisor(el),blocks=[];
+  for(let i=0,k=0;i<nb;i++){const d=data.slice(k,k+sl-el+(i<ns?0:1));k+=d.length;const e=rem(d,dv);if(i<ns)d.push(0);blocks.push(d.concat(e))}
+  const cw=[];for(let i=0;i<blocks[0].length;i++)blocks.forEach((b,j)=>{if(i!==sl-el||j>=ns)cw.push(b[i])});
+  // function patterns
+  const size=v*4+17,M=[...Array(size)].map(()=>Array(size).fill(false)),F=[...Array(size)].map(()=>Array(size).fill(false));
+  const set=(x,y,d)=>{M[y][x]=d;F[y][x]=true};
+  for(let i=0;i<size;i++){set(6,i,i%2===0);set(i,6,i%2===0)}
+  const finder=(x,y)=>{for(let dy=-4;dy<=4;dy++)for(let dx=-4;dx<=4;dx++){const d=Math.max(Math.abs(dx),Math.abs(dy)),xx=x+dx,yy=y+dy;if(xx>=0&&xx<size&&yy>=0&&yy<size)set(xx,yy,d!==2&&d!==4)}};
+  finder(3,3);finder(size-4,3);finder(3,size-4);
+  if(v>1){const n=Math.floor(v/7)+2,step=v===32?26:Math.ceil((v*4+4)/(n*2-2))*2,pos=[6];for(let p=size-7;pos.length<n;p-=step)pos.splice(1,0,p);
+   for(let i=0;i<n;i++)for(let j=0;j<n;j++){if((i===0&&j===0)||(i===0&&j===n-1)||(i===n-1&&j===0))continue;for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)set(pos[i]+dx,pos[j]+dy,Math.max(Math.abs(dx),Math.abs(dy))!==1)}}
+  const format=mask=>{const d=mask;let r=d;for(let i=0;i<10;i++)r=(r<<1)^((r>>>9)*0x537);const b=((d<<10)|r)^0x5412; // ECC M = 00
+   for(let i=0;i<=5;i++)set(8,i,bit(b,i));set(8,7,bit(b,6));set(8,8,bit(b,7));set(7,8,bit(b,8));for(let i=9;i<15;i++)set(14-i,8,bit(b,i));
+   for(let i=0;i<8;i++)set(size-1-i,8,bit(b,i));for(let i=8;i<15;i++)set(8,size-15+i,bit(b,i));set(8,size-8,true)};
+  format(0);
+  if(v>=7){let r=v;for(let i=0;i<12;i++)r=(r<<1)^((r>>>11)*0x1F25);const b=v<<12|r;for(let i=0;i<18;i++){const a=size-11+i%3,c=Math.floor(i/3);set(a,c,bit(b,i));set(c,a,bit(b,i))}}
+  // data
+  for(let right=size-1,i=0;right>=1;right-=2){if(right===6)right=5;
+   for(let vert=0;vert<size;vert++)for(let j=0;j<2;j++){const x=right-j,y=((right+1)&2)===0?size-1-vert:vert;if(!F[y][x]&&i<cw.length*8){M[y][x]=bit(cw[i>>>3],7-(i&7));i++}}}
+  // masks: pick the lowest (simplified) penalty
+  const cond=[(x,y)=>(x+y)%2===0,(x,y)=>y%2===0,(x,y)=>x%3===0,(x,y)=>(x+y)%3===0,(x,y)=>(Math.floor(x/3)+Math.floor(y/2))%2===0,(x,y)=>x*y%2+x*y%3===0,(x,y)=>(x*y%2+x*y%3)%2===0,(x,y)=>((x+y)%2+x*y%3)%2===0];
+  const apply=m=>{for(let y=0;y<size;y++)for(let x=0;x<size;x++)if(!F[y][x]&&cond[m](x,y))M[y][x]=!M[y][x]};
+  const penalty=()=>{let p=0,dark=0;for(let a=0;a<size;a++){for(const horiz of[true,false]){let run=1;for(let b=1;b<size;b++){const c=horiz?M[a][b]:M[b][a],pr=horiz?M[a][b-1]:M[b-1][a];if(c===pr){run++;if(run===5)p+=3;else if(run>5)p++}else run=1}}}
+   for(let y=0;y<size-1;y++)for(let x=0;x<size-1;x++){const c=M[y][x];if(c===M[y][x+1]&&c===M[y+1][x]&&c===M[y+1][x+1])p+=3}
+   M.forEach(r=>r.forEach(c=>{if(c)dark++}));return p+Math.floor(Math.abs(dark*20-size*size*10)/(size*size))*10};
+  let best=0,bestP=Infinity;for(let m=0;m<8;m++){apply(m);format(m);const p=penalty();if(p<bestP){bestP=p;best=m}apply(m)}
+  apply(best);format(best);
+  return M;
+ }
+ function svg(text,dark='#000',light='#fff'){const M=encode(text),n=M.length,q=4;let d='';
+  M.forEach((r,y)=>r.forEach((c,x)=>{if(c)d+=`M${x+q},${y+q}h1v1h-1z`}));
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${n+q*2} ${n+q*2}" shape-rendering="crispEdges"><rect width="100%" height="100%" fill="${light}"/><path d="${d}" fill="${dark}"/></svg>`}
+ return {encode,svg};
+})();
 
 /* ───────── navigation ───────── */
 const NAV=[
- ['home','Обзор','home'],['zapret','Стратегии','bolt'],['tests','Поиск ALT','search'],['tg','Telegram','send'],
- ['sep'],['diag','Диагностика','stetho'],['updates','Обновления','download'],['logs','Журнал','terminal'],['settings','Настройки','gear']];
+ ['home','Обзор','home'],['zapret','Стратегии','bolt'],['tests','Поиск ALT','search'],['tg','Telegram','send'],['auto','Автоматика','robot'],
+ ['sep'],['history','История','chart'],['diag','Диагностика','stetho'],['updates','Обновления','download'],['logs','Журнал','terminal'],['settings','Настройки','gear']];
 function buildNav(){const s=$('#side');s.innerHTML=NAV.map(n=>n[0]==='sep'?'<div class="sep"></div>':
-  `<div class="nav" data-nav="${n[0]}">${svg(n[2])}<span>${n[1]}</span>${n[0]==='zapret'?'<span class="dot" id="dotZ"></span>':n[0]==='tg'?'<span class="dot" id="dotT"></span>':n[0]==='updates'?'<span class="badge hidden" id="updBadge">1</span>':''}</div>`).join('')+
-  `<div class="foot glass"><div>Обход: <b id="footZ">—</b></div><div>Прокси: <b id="footT">—</b></div></div>`+
+  `<div class="nav" data-nav="${n[0]}">${svg(n[2])}<span>${t(n[1])}</span>${n[0]==='zapret'?'<span class="dot" id="dotZ"></span>':n[0]==='tg'?'<span class="dot" id="dotT"></span>':n[0]==='updates'?'<span class="badge hidden" id="updBadge">1</span>':''}</div>`).join('')+
+  `<div class="foot glass"><div>${t('Обход')}: <b id="footZ">—</b></div><div>${t('Прокси')}: <b id="footT">—</b></div></div>`+
   `<div class="sign">by prokrastinaciya <span class="heart">&lt;3</span></div>`;
   $$('.nav').forEach(n=>n.onclick=()=>go(n.dataset.nav))}
 let page='home';
-function go(p){page=p;$$('.nav').forEach(n=>n.classList.toggle('on',n.dataset.nav===p));$$('.page').forEach(s=>s.classList.toggle('on',s.dataset.page===p));$('#main').scrollTop=0;
+function go(p){page=p;const navP=p==='editor'?'zapret':p;$$('.nav').forEach(n=>n.classList.toggle('on',n.dataset.nav===navP));$$('.page').forEach(s=>s.classList.toggle('on',s.dataset.page===p));$('#main').scrollTop=0;
   (enter[p]||(()=>{}))()}
 const enter={
   zapret:()=>{loadFakes();if(!listLoaded)loadList(curList)},
-  tg:()=>{loadTgConfig();loadTgLog()},
+  tg:()=>{loadTgConfig();loadTgLog();loadLan()},
+  auto:()=>{renderSettings();renderAuto()},
+  history:()=>loadHistory(),
   logs:()=>{if(logTab==='winws')loadWinwsLog()},
   updates:()=>{renderUpdates();renderSettings()},
   settings:()=>{renderSettings()},
@@ -625,63 +1319,82 @@ $('#drag').addEventListener('dblclick',()=>api('app.window',{op:'max'}));
 document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g)go(g.dataset.go);const u=e.target.closest('[data-url]');if(u)api('app.open',{target:u.dataset.url})});
 
 /* ───────── state ───────── */
-let S={zapret:null,tg:null,settings:{},updates:null,app:null};
+let S={zapret:null,tg:null,settings:{},updates:null,app:null,lan:null,net:null,health:null};
 async function refresh(){
-  try{const [z,t]=await Promise.all([api('zapret.status'),api('tg.status')]);S.zapret=z;S.tg=t;renderZ();renderT();if(page==='updates'&&!Object.keys(progress).length)renderUpdates()}catch(e){}
+  try{const [z,tg]=await Promise.all([api('zapret.status'),api('tg.status')]);S.zapret=z;S.tg=tg;renderZ();renderT();if(page==='updates'&&!Object.keys(progress).length)renderUpdates()}catch(e){}
 }
 function renderZ(){const z=S.zapret;if(!z)return;
-  const on=z.mode!=='off';
-  $('#orbZ').classList.toggle('on',on);$('#heroZ').classList.toggle('on',on);
-  $('#dotZ')&&$('#dotZ').classList.toggle('on',on);
-  $('#footZ').textContent=on?pretty(z.strategy):'выключен';
-  $('#zChip').innerHTML=!z.installed?'<span class="chip bad">не установлен</span>':on?`<span class="chip ok"><span class="pulse"></span>${z.mode==='service'?'служба':'работает'}</span>`:'<span class="chip">выключен</span>';
-  $('#zState').textContent=!z.installed?'Установите zapret на вкладке «Обновления»':on?(z.mode==='service'?'Работает как служба Windows: ':'Запущен вручную: ')+pretty(z.strategy):'Выберите стратегию и нажмите на кнопку';
-  const sel=$('#zSelect');const want=(on?(z.mode==='service'?(z.serviceStrategy||'')+'.bat':z.strategy):z.lastStrategy)||z.lastStrategy||'general.bat';
-  if(sel.dataset.sig!==z.strategies.join('|')){sel.innerHTML=z.strategies.map(s=>`<option value="${esc(s)}">${esc(pretty(s))}</option>`).join('');sel.dataset.sig=z.strategies.join('|')}
+  const isOn=z.mode!=='off';
+  $('#orbZ').classList.toggle('on',isOn);$('#heroZ').classList.toggle('on',isOn);
+  $('#dotZ')&&$('#dotZ').classList.toggle('on',isOn);
+  $('#footZ').textContent=isOn?pretty(z.strategy):t('выключен');
+  $('#zChip').innerHTML=!z.installed?`<span class="chip bad">${t('не установлен')}</span>`:isOn?`<span class="chip ok"><span class="pulse"></span>${z.mode==='service'?t('служба'):t('работает')}</span>`:`<span class="chip">${t('выключен')}</span>`;
+  $('#zState').textContent=!z.installed?t('Установите zapret на вкладке «Обновления»'):isOn?(z.mode==='service'?t('Работает как служба Windows: '):t('Запущен вручную: '))+pretty(z.strategy):t('Выберите стратегию и нажмите на кнопку');
+  const sel=$('#zSelect');const want=(isOn?(z.mode==='service'?(z.serviceStrategy||'')+'.bat':z.strategy):z.lastStrategy)||z.lastStrategy||'general.bat';
+  if(sel.dataset.sig!==z.strategies.join('|')){sel.innerHTML=z.strategies.map(s=>`<option value="${esc(s)}">${esc(pretty(s))}${isCustom(s)?' ★':''}</option>`).join('');sel.dataset.sig=z.strategies.join('|')}
   if(document.activeElement!==sel&&z.strategies.includes(want))sel.value=want;
   const gf=z.gameFilter||{};
-  $('#zMeta').innerHTML=z.installed?`<span class="chip vio">v${esc(z.version||'?')}</span><span class="chip">IPSet: ${esc(z.ipset)}</span><span class="chip">Game: ${gf.mode==='disabled'?'выкл':esc(gf.mode)}</span>`:'';
-  renderStrats();renderZSettings()}
-function renderT(){const t=S.tg;if(!t)return;
-  $('#orbT').classList.toggle('on',t.running);$('#heroT').classList.toggle('on',t.running);
-  $('#dotT')&&$('#dotT').classList.toggle('on',t.running);
-  $('#footT').textContent=!t.installed?'не установлен':t.running?(t.listening?'работает':'запуск…'):'выключен';
-  $('#tChip').innerHTML=!t.installed?'<span class="chip bad">не установлен</span>':t.running?(t.listening?'<span class="chip ok"><span class="pulse"></span>работает</span>':'<span class="chip warn">порт не отвечает</span>'):t.external?'<span class="chip warn">сторонний экземпляр</span>':'<span class="chip">выключен</span>';
-  $('#tState').textContent=!t.installed?'Установите прокси на вкладке «Обновления»':t.running?`Слушает ${t.host}:${t.port} — MTProto`:'Нажмите на кнопку, чтобы запустить прокси';
-  $('#tLink').textContent=t.link||'—';
-  $('#tMeta').textContent=t.version?'v'+t.version:'';
-  $('#tConnect').disabled=!t.running;
-  $('#tgNotInstalled').innerHTML=t.installed?'':`<div class="banner">${svg('info')}<div class="grow"><b>TG WS Proxy не установлен.</b> <span class="muted">Zapret Hub скачает последнюю версию с GitHub.</span></div><button class="btn pri sm" id="tgInstallNow">${svg('download')}Установить</button></div>`;
+  const hk=S.settings.Hotkey&&S.app&&S.app.hotkeyOk?`<span class="chip" title="${esc(t('Горячая клавиша вкл/выкл обхода'))}">${esc(hkLabel(S.settings.Hotkey))}</span>`:'';
+  $('#zMeta').innerHTML=z.installed?`<span class="chip vio">v${esc(z.version||'?')}</span><span class="chip">IPSet: ${esc(z.ipset)}</span><span class="chip">Game: ${gf.mode==='disabled'?t('выкл'):esc(gf.mode)}</span>${hk}`:'';
+  renderStrats();renderZSettings();renderTestList()}
+function renderT(){const tg=S.tg;if(!tg)return;
+  $('#orbT').classList.toggle('on',tg.running);$('#heroT').classList.toggle('on',tg.running);
+  $('#dotT')&&$('#dotT').classList.toggle('on',tg.running);
+  $('#footT').textContent=!tg.installed?t('не установлен'):tg.running?(tg.listening?t('работает'):t('запуск…')):t('выключен');
+  $('#tChip').innerHTML=!tg.installed?`<span class="chip bad">${t('не установлен')}</span>`:tg.running?(tg.listening?`<span class="chip ok"><span class="pulse"></span>${t('работает')}</span>`:`<span class="chip warn">${t('порт не отвечает')}</span>`):tg.external?`<span class="chip warn">${t('сторонний экземпляр')}</span>`:`<span class="chip">${t('выключен')}</span>`;
+  $('#tState').textContent=!tg.installed?t('Установите прокси на вкладке «Обновления»'):tg.running?t('Слушает {0}:{1} — MTProto',tg.host,tg.port)+(tg.host==='0.0.0.0'?t(' • раздаётся по Wi-Fi'):''):t('Нажмите на кнопку, чтобы запустить прокси');
+  $('#tLink').textContent=tg.link||'—';
+  $('#tMeta').textContent=tg.version?'v'+tg.version:'';
+  $('#tConnect').disabled=!tg.running;
+  $('#tgNotInstalled').innerHTML=tg.installed?'':`<div class="banner">${svg('info')}<div class="grow"><b>${t('TG WS Proxy не установлен.')}</b> <span class="muted">${t('Zapret Hub скачает последнюю версию с GitHub.')}</span></div><button class="btn pri sm" id="tgInstallNow">${svg('download')}${t('Установить')}</button></div>`;
   const b=$('#tgInstallNow');if(b)b.onclick=()=>updateTool('tg',b)}
 
 /* ───────── dashboard ───────── */
 $('#orbZ').onclick=async()=>{const z=S.zapret;if(!z)return;const o=$('#orbZ');
   if(!z.installed){go('updates');return}
   o.classList.add('wait');
-  try{if(z.mode!=='off'){await api('zapret.stop');toast('Обход остановлен','info')}else{await api('zapret.start',{bat:$('#zSelect').value});toast('Запущена стратегия '+pretty($('#zSelect').value),'ok')}}
+  try{if(z.mode!=='off'){await api('zapret.stop');toast(t('Обход остановлен'),'info')}else{await api('zapret.start',{bat:$('#zSelect').value});toast(t('Запущена стратегия {0}',pretty($('#zSelect').value)),'ok')}}
   catch(e){toast(e.message,'err',8000)}finally{o.classList.remove('wait');refresh()}};
 $('#zSelect').onchange=async()=>{const z=S.zapret;if(!z||z.mode==='off')return;const bat=$('#zSelect').value;$('#orbZ').classList.add('wait');
-  try{if(z.mode==='service'){await api('zapret.installService',{bat})}else{await api('zapret.start',{bat})}toast('Переключено на '+pretty(bat),'ok')}catch(e){toast(e.message,'err',8000)}finally{$('#orbZ').classList.remove('wait');refresh()}};
-$('#zRestart').onclick=()=>run($('#zRestart'),()=>api('zapret.restart'),'Перезапущено').then(refresh);
-$('#orbT').onclick=async()=>{const t=S.tg;if(!t)return;if(!t.installed){go('updates');return}const o=$('#orbT');o.classList.add('wait');
-  try{if(t.running){await api('tg.stop')}else{await api('tg.start');toast('Прокси запущен. Нажмите «Подключить Telegram».','ok')}}catch(e){toast(e.message,'err',8000)}finally{o.classList.remove('wait');refresh()}};
-$('#tCopy').onclick=()=>run(null,()=>api('app.copy',{text:S.tg.link}),'Ссылка скопирована');
-$('#tConnect').onclick=()=>run(null,()=>api('tg.openTelegram'),'Открываю Telegram…');
+  try{await api('zapret.switch',{bat});toast(t('Переключено на {0}',pretty(bat)),'ok')}catch(e){toast(e.message,'err',8000)}finally{$('#orbZ').classList.remove('wait');refresh()}};
+$('#zRestart').onclick=()=>run($('#zRestart'),()=>api('zapret.restart'),t('Перезапущено')).then(refresh);
+$('#orbT').onclick=async()=>{const tg=S.tg;if(!tg)return;if(!tg.installed){go('updates');return}const o=$('#orbT');o.classList.add('wait');
+  try{if(tg.running){await api('tg.stop')}else{await api('tg.start');toast(t('Прокси запущен. Нажмите «Подключить Telegram».'),'ok')}}catch(e){toast(e.message,'err',8000)}finally{o.classList.remove('wait');refresh()}};
+$('#tCopy').onclick=()=>run(null,()=>api('app.copy',{text:S.tg.link}),t('Ссылка скопирована'));
+$('#tConnect').onclick=()=>run(null,()=>api('tg.openTelegram'),t('Открываю Telegram…'));
+$('#tPhone').onclick=()=>{go('tg');setTimeout(()=>$('#lanCard').scrollIntoView({behavior:'smooth'}),50)};
 $('#qUpd').onclick=()=>run($('#qUpd'),()=>api('app.checkUpdates'),r=>updSummary(r));
-$('#qIpset').onclick=()=>run($('#qIpset'),()=>api('zapret.updateIpset'),'IPSet-список обновлён');
+$('#qIpset').onclick=()=>run($('#qIpset'),()=>api('zapret.updateIpset'),t('IPSet-список обновлён'));
 
-const HEALTH=[['discord','Discord',['DiscordMain','DiscordGateway','DiscordCDN','DiscordUpdates','Discord']],['youtube','YouTube',['YouTubeWeb','YouTubeShort','YouTubeImage','YouTubeVideoRedirect','YouTube','GoogleVideo']],['globe','Google и CDN',['GoogleMain','GoogleGstatic','CloudflareWeb','CloudflareCDN']],['send','Telegram DC',null]];
-function renderHealth(res,dcs,busy){$('#health').innerHTML=HEALTH.map(([ic,name,keys])=>{let cls='',sub='Не проверялось';
-  if(busy){cls='wait';sub='Проверка…'}
-  else if(keys&&res){const rows=res.rows.filter(r=>keys.includes(r.name)&&r.url);let ok=0,tot=0;rows.forEach(r=>Object.values(r.checks).forEach(v=>{if(v!=='UNSUP'){tot++;if(v==='OK')ok++}}));
-    if(tot){cls=ok===tot?'ok':ok===0?'bad':'warn';sub=ok===tot?'Доступно':ok===0?'Недоступно':`Частично: ${ok}/${tot}`}}
-  else if(!keys&&dcs){const ok=dcs.filter(d=>d.ok).length;cls=ok===dcs.length?'ok':ok===0?'bad':'warn';sub=`WebSocket: ${ok}/${dcs.length} DC`}
-  return `<div class="glass tile ${cls}"><div class="ic">${busy?svg('loader'):svg(ic)}</div><div><div class="t">${name}</div><div class="s">${sub}</div></div></div>`}).join('')}
-renderHealth();
-$('#btnQuick').onclick=async()=>{const b=$('#btnQuick');b.classList.add('busy');renderHealth(null,null,true);
-  const [r,d]=await Promise.allSettled([api('test.quick'),api('test.tgdc')]);b.classList.remove('busy');
-  renderHealth(r.status==='fulfilled'?r.value:null,d.status==='fulfilled'?d.value:null);
-  if(r.status==='rejected')toast(r.reason.message,'err')};
+function renderInstallBanner(){const i=S.app&&S.app.install;const el=$('#installBanner');
+  if(!i||i.installed||i.installedElsewhere||S.settings.InstallPromptDismissed){el.innerHTML='';return}
+  el.innerHTML=`<div class="banner" style="background:linear-gradient(90deg,rgba(139,108,255,.18),rgba(25,227,207,.08));border-color:rgba(139,108,255,.35)">${svg('download')}<div class="grow"><b>${t('Установить Zapret Hub в систему?')}</b> <span class="muted">${t('Появятся ярлыки в «Пуске» и деинсталлятор. Portable-версией можно пользоваться и дальше.')}</span></div><button class="btn sm pri" id="ibInstall">${t('Установить')}</button><button class="btn sm ghost" id="ibNo">${t('Не надо')}</button></div>`;
+  $('#ibInstall').onclick=()=>installApp($('#ibInstall'));
+  $('#ibNo').onclick=()=>run(null,async()=>{S.settings=await api('app.saveSettings',{InstallPromptDismissed:true});renderInstallBanner()})}
+
+let lastHealth=null,lastDcs=null;
+const TILES=[['discord','Discord'],['mic','Голос Discord'],['youtube','YouTube'],['send','Telegram DC']];
+function renderHealth(h,dcs,busy){if(h!==undefined)lastHealth=h;if(dcs!==undefined)lastDcs=dcs;h=lastHealth;dcs=lastDcs;
+  $('#health').innerHTML=TILES.map(([ic,name],i)=>{let cls='',sub=t('Не проверялось');
+  if(busy){cls='wait';sub=t('Проверка…')}
+  else if(i<3&&h){
+    if(i===1){if(!h.voice)sub=S.settings.CheckVoice?t('Нет данных'):t('Проверка выключена');else{cls=h.voice.ok?'ok':'bad';sub=h.voice.ok?t('UDP: {0} мс',h.voice.ms):t('Серверы не отвечают')}}
+    else if(!h.online){cls='warn';sub=t('Нет интернета')}
+    else{const r=i===0?h.discord:h.youtube;cls=r>=1?'ok':r<=0?'bad':'warn';sub=r>=1?t('Доступно'):r<=0?t('Недоступно'):t('Частично: {0}%',Math.round(r*100))}
+    if(h.time&&cls)sub+=' • '+h.time}
+  else if(i===3&&dcs){const ok=dcs.filter(d=>d.ok).length;cls=ok===dcs.length?'ok':ok===0?'bad':'warn';sub=t('WebSocket: {0}/{1} DC',ok,dcs.length)}
+  return `<div class="glass tile ${cls}"><div class="ic">${busy?svg('loader'):svg(ic)}</div><div><div class="t">${t(name)}</div><div class="s">${sub}</div></div></div>`}).join('')}
+renderHealth(null,null);
+async function checkNow(btn){if(btn)btn.classList.add('busy');renderHealth(undefined,undefined,true);
+  const [r,d]=await Promise.allSettled([api('health.check'),api('test.tgdc')]);if(btn)btn.classList.remove('busy');
+  renderHealth(r.status==='fulfilled'?r.value:lastHealth,d.status==='fulfilled'?d.value:lastDcs);
+  if(r.status==='rejected')toast(r.reason.message,'err');return r.value}
+$('#btnQuick').onclick=()=>checkNow($('#btnQuick'));
+on('health',h=>{S.health=h;renderHealth(h);renderAuto()});
+on('heal',m=>{const d=m.data,el=$('#healBanner');
+  if(m.type==='begin'||m.type==='progress'){const txt=m.type==='progress'?t('проверяю {0} ({1}/{2})',pretty(d.name),d.index+1,d.total):t('подготовка…');
+    el.innerHTML=`<div class="banner" style="background:linear-gradient(90deg,rgba(255,195,92,.16),rgba(139,108,255,.1));border-color:rgba(255,195,92,.35)">${svg('heal')}<div class="grow"><b>${t('Самовосстановление')}:</b> <span class="muted">${esc(txt)}</span></div></div>`}
+  if(m.type==='done'||m.type==='error'){el.innerHTML='';refresh()}});
 
 /* ───────── log ───────── */
 const logLines=[];
@@ -689,109 +1402,248 @@ function logHtml(l){return `<div class="l ${esc(l.level)}"><span class="tm">${es
 function pushLog(l){logLines.push(l);if(logLines.length>800)logLines.shift();
   const f=$('#fullLog');const stick=f.parentElement.scrollTop+f.parentElement.clientHeight>=f.parentElement.scrollHeight-30;f.insertAdjacentHTML('beforeend',logHtml(l));if(stick)f.parentElement.scrollTop=1e9;
   renderMiniLog()}
-function renderMiniLog(){$('#miniLog').innerHTML=logLines.slice(-6).reverse().map(logHtml).join('')||'<span class="muted small">Пока пусто</span>'}
+function renderMiniLog(){$('#miniLog').innerHTML=logLines.slice(-6).reverse().map(logHtml).join('')||`<span class="muted small">${t('Пока пусто')}</span>`}
 on('log',pushLog);
 let logTab='hub';
 $$('#logTab button').forEach(b=>b.onclick=()=>{logTab=b.dataset.v;$$('#logTab button').forEach(x=>x.classList.toggle('on',x===b));$('#fullLog').classList.toggle('hidden',logTab!=='hub');$('#winwsLog').classList.toggle('hidden',logTab!=='winws');if(logTab==='winws')loadWinwsLog()});
-async function loadWinwsLog(){try{const t=await api('zapret.log');$('#winwsLog').textContent=t||'Журнал пуст. Он заполняется, когда стратегия запущена вручную через Zapret Hub (служба пишет в журнал событий Windows).'}catch(e){}}
+async function loadWinwsLog(){try{const s=await api('zapret.log');$('#winwsLog').textContent=s||t('Журнал пуст. Он заполняется, когда стратегия запущена вручную через Zapret Hub (служба пишет в журнал событий Windows).')}catch(e){}}
 
 /* ───────── strategies page ───────── */
 let lastScores={};
 function renderStrats(){const z=S.zapret;const el=$('#strats');if(!z)return;
-  if(!z.installed){el.innerHTML=`<div class="empty" style="grid-column:1/-1">${svg('download')}<div>zapret ещё не установлен</div><button class="btn pri" data-go="updates">Установить</button></div>`;return}
+  if(!z.installed){el.innerHTML=`<div class="empty" style="grid-column:1/-1">${svg('download')}<div>${t('zapret ещё не установлен')}</div><button class="btn pri" data-go="updates">${t('Установить')}</button></div>`;return}
   const f=($('#stratFilter').value||'').toLowerCase();
   const curBat=z.mode==='service'?(z.serviceStrategy||'')+'.bat':z.mode==='standalone'?z.strategy:null;
   const sig=JSON.stringify([z.strategies,curBat,z.mode,f,lastScores]);if(el.dataset.sig===sig)return;el.dataset.sig=sig;
-  el.innerHTML=z.strategies.filter(s=>s.toLowerCase().includes(f)).map(s=>{const cur=s===curBat;const sc=lastScores[s];
-    return `<div class="glass strat ${cur?'cur':''}"><div><div class="nm">${esc(pretty(s))}${cur?`<span class="chip ok">${z.mode==='service'?'служба':'активна'}</span>`:''}${sc!=null&&!cur?`<span class="chip ${sc>=90?'ok':sc>=50?'warn':'bad'}">${sc}%</span>`:''}</div><div class="fn" title="${esc(s)}">${esc(s)}</div></div>
+  el.innerHTML=z.strategies.filter(s=>s.toLowerCase().includes(f)).map(s=>{const cur=s===curBat;const sc=lastScores[s];const own=isCustom(s);
+    return `<div class="glass strat ${cur?'cur':''}"><div><div class="nm">${esc(pretty(s))}${own?`<span class="chip vio">${t('своя')}</span>`:''}${cur?`<span class="chip ok">${z.mode==='service'?t('служба'):t('активна')}</span>`:''}${sc!=null&&!cur?`<span class="chip ${sc>=90?'ok':sc>=50?'warn':'bad'}">${sc}%</span>`:''}</div><div class="fn" title="${esc(s)}">${esc(s)}</div></div>
     ${sc!=null?`<div class="score"><i style="width:${sc}%"></i></div>`:''}
-    <div class="acts"><button class="btn sm ${cur&&z.mode==='standalone'?'':'pri'}" data-run="${esc(s)}">${svg('play')}Запустить</button><button class="btn sm" data-svc="${esc(s)}" title="Установить службой Windows (автозапуск)">${svg('shield')}Служба</button><button class="btn sm icon ghost" data-args="${esc(s)}" title="Аргументы winws">${svg('terminal')}</button></div></div>`}).join('')}
+    <div class="acts"><button class="btn sm ${cur&&z.mode==='standalone'?'':'pri'}" data-run="${esc(s)}">${svg('play')}${t('Запустить')}</button><button class="btn sm" data-svc="${esc(s)}" title="${esc(t('Установить службой Windows (автозапуск)'))}">${svg('shield')}${t('Служба')}</button><button class="btn sm icon ghost" data-args="${esc(s)}" title="${esc(t('Аргументы winws'))}">${svg('terminal')}</button><button class="btn sm icon ghost" data-edit="${esc(s)}" title="${esc(own?t('Изменить'):t('Создать на основе этой'))}">${svg('edit')}</button>${own?`<button class="btn sm icon ghost" data-del="${esc(s)}" title="${esc(t('Удалить'))}">${svg('trash')}</button>`:''}</div></div>`}).join('')}
 $('#stratFilter').oninput=renderStrats;
 $('#strats').addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)return;
-  if(b.dataset.run)run(b,()=>api('zapret.start',{bat:b.dataset.run}),'Запущена '+pretty(b.dataset.run)).then(refresh);
-  if(b.dataset.svc){if(await confirmBox('Установить службу?',`Стратегия <b>${esc(pretty(b.dataset.svc))}</b> будет работать как служба Windows и запускаться автоматически при старте системы — даже без Zapret Hub.`,'Установить'))run(b,()=>api('zapret.installService',{bat:b.dataset.svc}),'Служба установлена').then(refresh)}
-  if(b.dataset.args){const a=await api('zapret.args',{bat:b.dataset.args}).catch(e=>e.message);modal(pretty(b.dataset.args),`<pre class="raw" style="max-height:50vh;overflow:auto">${esc(String(a).replace(/ --/g,'\n--'))}</pre>`,[{text:'Закрыть',value:0}])}});
-$('#zRemove').onclick=async()=>{if(await confirmBox('Удалить службы?','Будут остановлены и удалены службы <b>zapret</b> и <b>WinDivert</b>, а также завершён winws.exe.','Удалить','danger'))run($('#zRemove'),()=>api('zapret.removeServices'),'Службы удалены').then(refresh)};
+  if(b.dataset.run)run(b,()=>api('zapret.start',{bat:b.dataset.run}),t('Запущена {0}',pretty(b.dataset.run))).then(refresh);
+  if(b.dataset.svc){if(await confirmBox(t('Установить службу?'),t('Стратегия <b>{0}</b> будет работать как служба Windows и запускаться автоматически при старте системы — даже без Zapret Hub.',esc(pretty(b.dataset.svc))),t('Установить')))run(b,()=>api('zapret.installService',{bat:b.dataset.svc}),t('Служба установлена')).then(refresh)}
+  if(b.dataset.args){const a=await api('zapret.args',{bat:b.dataset.args}).catch(e=>e.message);modal(pretty(b.dataset.args),`<pre class="raw" style="max-height:50vh;overflow:auto">${esc(String(a).replace(/ --/g,'\n--'))}</pre>`,[{text:t('Закрыть'),value:0}])}
+  if(b.dataset.edit)openEditor(b.dataset.edit);
+  if(b.dataset.del&&await confirmBox(t('Удалить стратегию?'),t('Файл <b>{0}</b> будет удалён.',esc(b.dataset.del)),t('Удалить'),'danger'))run(b,()=>api('zapret.deleteCustom',{bat:b.dataset.del}),t('Стратегия удалена')).then(refresh)});
+$('#zRemove').onclick=async()=>{if(await confirmBox(t('Удалить службы?'),t('Будут остановлены и удалены службы <b>zapret</b> и <b>WinDivert</b>, а также завершён winws.exe.'),t('Удалить'),'danger'))run($('#zRemove'),()=>api('zapret.removeServices'),t('Службы удалены')).then(refresh)};
+$('#stratNew').onclick=()=>openEditor(null);
 
 function setSeg(sel,v){$$(sel+' button').forEach(b=>b.classList.toggle('on',b.dataset.v===v))}
 let gfDirty=false;
 function renderZSettings(){const z=S.zapret;if(!z)return;const gf=z.gameFilter;
   if(!gfDirty){setSeg('#gfMode',gf.mode);$('#gfTcp').value=gf.tcp;$('#gfUdp').value=gf.udp}
   setSeg('#ipMode',z.ipset);
-  $('#ipHint').textContent={loaded:'Обрабатываются IP из списка ipset-all.txt (рекомендуется).',none:'IPSet отключён: обрабатываются только домены из списков.',any:'Обрабатываются все IP — максимальный охват, но возможны побочные эффекты.',missing:'Файл ipset-all.txt не найден — обновите список.'}[z.ipset]||'';
+  $('#ipHint').textContent={loaded:t('Обрабатываются IP из списка ipset-all.txt (рекомендуется).'),none:t('IPSet отключён: обрабатываются только домены из списков.'),any:t('Обрабатываются все IP — максимальный охват, но возможны побочные эффекты.'),missing:t('Файл ipset-all.txt не найден — обновите список.')}[z.ipset]||'';
   $('#zCheckFlag').checked=!!z.checkUpdatesFlag}
 $$('#gfMode button').forEach(b=>b.onclick=()=>{gfDirty=true;setSeg('#gfMode',b.dataset.v)});
 $('#gfTcp').oninput=$('#gfUdp').oninput=()=>gfDirty=true;
-$('#gfSave').onclick=()=>run($('#gfSave'),async()=>{const mode=$('#gfMode button.on').dataset.v;await api('zapret.setGameFilter',{mode,tcp:$('#gfTcp').value,udp:$('#gfUdp').value});gfDirty=false;await restartIfRunning()},'Game Filter применён').then(refresh);
+$('#gfSave').onclick=()=>run($('#gfSave'),async()=>{const mode=$('#gfMode button.on').dataset.v;await api('zapret.setGameFilter',{mode,tcp:$('#gfTcp').value,udp:$('#gfUdp').value});gfDirty=false;await restartIfRunning()},t('Game Filter применён')).then(refresh);
 $$('#ipMode button').forEach(b=>b.onclick=()=>run(null,async()=>{await api('zapret.setIpset',{mode:b.dataset.v});await restartIfRunning()},'IPSet: '+b.dataset.v).then(refresh));
-$('#ipUpdate').onclick=()=>run($('#ipUpdate'),async()=>{await api('zapret.updateIpset');await restartIfRunning()},'Список обновлён').then(refresh);
+$('#ipUpdate').onclick=()=>run($('#ipUpdate'),async()=>{await api('zapret.updateIpset');await restartIfRunning()},t('Список обновлён')).then(refresh);
 async function restartIfRunning(){if(S.zapret&&S.zapret.mode!=='off')await api('zapret.restart')}
 
 async function loadFakes(){try{const f=await api('zapret.fakes');const opts=f.files.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
   for(const [id,cur] of [['#fkDiscord',f.discord],['#fkGame',f.game]]){const s=$(id);s.innerHTML=(cur&&!f.files.includes(cur)?`<option value="">${esc(cur)}</option>`:'')+opts;s.value=f.files.includes(cur)?cur:''}}catch(e){}}
-$('#fkDiscord').onchange=e=>run(null,async()=>{await api('zapret.replaceFake',{type:'discord',name:e.target.value});await restartIfRunning()},'Фейк Discord заменён');
-$('#fkGame').onchange=e=>run(null,async()=>{await api('zapret.replaceFake',{type:'game',name:e.target.value});await restartIfRunning()},'Фейк GameFilter заменён');
+$('#fkDiscord').onchange=e=>run(null,async()=>{await api('zapret.replaceFake',{type:'discord',name:e.target.value});await restartIfRunning()},t('Фейк Discord заменён'));
+$('#fkGame').onchange=e=>run(null,async()=>{await api('zapret.replaceFake',{type:'game',name:e.target.value});await restartIfRunning()},t('Фейк GameFilter заменён'));
 
 $('#hostsCheck').onclick=()=>run($('#hostsCheck'),async()=>{const h=await api('zapret.hostsCheck');
-  $('#hostsInfo').innerHTML=(h.upToDate?`<span class="chip ok">актуален</span> <span class="muted">все ${h.total} записей на месте</span>`:`<span class="chip warn">не хватает ${h.missing.length} из ${h.total}</span>`)+(h.youtube?' <span class="chip bad">есть записи YouTube</span>':'')});
-$('#hostsApply').onclick=async()=>{if(await confirmBox('Изменить файл hosts?','В системный файл hosts будет добавлен блок записей из репозитория zapret-discord-youtube (старый блок Zapret Hub заменится). Резервная копия сохранится в данных приложения.\n\nАнтивирус может предупредить об изменении hosts.','Применить'))run($('#hostsApply'),()=>api('zapret.hostsApply'),'hosts обновлён').then(()=>$('#hostsCheck').click())};
-$('#hostsRemove').onclick=()=>run($('#hostsRemove'),()=>api('zapret.hostsRemove'),'Блок удалён');
+  $('#hostsInfo').innerHTML=(h.upToDate?`<span class="chip ok">${t('актуален')}</span> <span class="muted">${t('все {0} записей на месте',h.total)}</span>`:`<span class="chip warn">${t('не хватает {0} из {1}',h.missing.length,h.total)}</span>`)+(h.youtube?` <span class="chip bad">${t('есть записи YouTube')}</span>`:'')});
+$('#hostsApply').onclick=async()=>{if(await confirmBox(t('Изменить файл hosts?'),t('В системный файл hosts будет добавлен блок записей из репозитория zapret-discord-youtube (старый блок Zapret Hub заменится). Резервная копия сохранится в данных приложения.\n\nАнтивирус может предупредить об изменении hosts.'),t('Применить')))run($('#hostsApply'),()=>api('zapret.hostsApply'),t('hosts обновлён')).then(()=>$('#hostsCheck').click())};
+$('#hostsRemove').onclick=()=>run($('#hostsRemove'),()=>api('zapret.hostsRemove'),t('Блок удалён'));
 
 const LISTS=[['list-general-user.txt','Мои домены','Домены, которые нужно обходить (по одному в строке). Поддомены включаются автоматически.'],['list-exclude-user.txt','Исключения','Домены, которые нельзя трогать.'],['ipset-exclude-user.txt','Исключённые IP','IP/подсети, исключённые из обработки.'],['list-general.txt','list-general','Встроенный список (перезаписывается при обновлении zapret).'],['list-google.txt','list-google','Домены Google/YouTube (перезаписывается при обновлении).'],['targets.txt','Цели тестов','Адреса для «Поиска ALT». Формат: Имя = "https://host" или Имя = "PING:1.1.1.1".']];
 let curList=LISTS[0][0],listLoaded=false;
-$('#listTabs').innerHTML=LISTS.map(l=>`<button data-l="${l[0]}">${l[1]}</button>`).join('');
+$('#listTabs').innerHTML=LISTS.map(l=>`<button data-l="${l[0]}">${esc(t(l[1]))}</button>`).join('');
 $$('#listTabs button').forEach(b=>b.onclick=()=>loadList(b.dataset.l));
-async function loadList(n){curList=n;$$('#listTabs button').forEach(b=>b.classList.toggle('on',b.dataset.l===n));$('#listHint').textContent=LISTS.find(l=>l[0]===n)[2];
+async function loadList(n){curList=n;$$('#listTabs button').forEach(b=>b.classList.toggle('on',b.dataset.l===n));$('#listHint').textContent=t(LISTS.find(l=>l[0]===n)[2]);
   try{$('#listText').value=await api('zapret.readList',{name:n});listLoaded=true}catch(e){$('#listText').value='';$('#listHint').textContent=e.message}}
-$('#listSave').onclick=()=>run($('#listSave'),async()=>{await api('zapret.saveList',{name:curList,text:$('#listText').value});if(curList!=='targets.txt')await restartIfRunning()},'Сохранено');
+$('#listSave').onclick=()=>run($('#listSave'),async()=>{await api('zapret.saveList',{name:curList,text:$('#listText').value});if(curList!=='targets.txt')await restartIfRunning()},t('Сохранено'));
+
+/* ───────── strategy editor ───────── */
+const GLOBAL_KEYS=['--wf-tcp','--wf-udp','--wf-l3','--wf-raw'];
+const EXCL=[['--hostlist-exclude','list-exclude.txt'],['--hostlist-exclude','list-exclude-user.txt'],['--ipset-exclude','ipset-exclude.txt'],['--ipset-exclude','ipset-exclude-user.txt']];
+const DESYNC_OPTS=['fake','fakedsplit','fakeddisorder','multisplit','multidisorder','hostfakesplit','syndata','split2','disorder2'];
+const FOOL_OPTS=['ts','md5sig','badseq','badsum','datanoack'];
+let ED=null,edInfo={bins:[],lists:[]},edEditing=null;
+const newBlock=()=>({proto:'tcp',ports:'443',l7:'',hostlists:[],domains:'',ipsets:[],excl:true,desync:'fake',repeats:'6',fooling:'',splitpos:'',fakeTls:[],fakeQuic:'',ttl:'',autottl:'',cutoff:'',anyProto:false,extra:''});
+function tokenize(s){return (s.match(/(?:[^\s"]+|"[^"]*")+/g)||[])}
+function tokKV(tok){const m=tok.match(/^(--[\w-]+)(?:=(.*))?$/);if(!m)return null;let v=m[2];if(v!=null&&/^".*"$/.test(v))v=v.slice(1,-1);return {k:m[1],v}}
+const fileOf=(v,pre)=>v&&v.startsWith(pre)?v.slice(pre.length):null;
+function parseArgs(raw){const toks=tokenize(raw);const groups=[[]];toks.forEach(x=>{if(x==='--new')groups.push([]);else groups[groups.length-1].push(x)});
+  const ed={wfTcp:'',wfUdp:'',globalsExtra:[],blocks:[]};
+  groups.forEach((g,gi)=>{const b=newBlock();Object.assign(b,{ports:'',desync:'',repeats:'',excl:false});const extra=[];const exSeen=new Set();
+    for(const tok of g){const kv=tokKV(tok);if(!kv){extra.push(tok);continue}const {k,v}=kv;
+      if(gi===0&&GLOBAL_KEYS.includes(k)){if(k==='--wf-tcp')ed.wfTcp=v||'';else if(k==='--wf-udp')ed.wfUdp=v||'';else ed.globalsExtra.push(tok);continue}
+      let lf;
+      if((k==='--filter-tcp'||k==='--filter-udp')&&!b.ports){b.proto=k.slice(9);b.ports=v||''}
+      else if(k==='--filter-l7'&&!b.l7)b.l7=v||'';
+      else if(k==='--hostlist'&&(lf=fileOf(v,'%LISTS%')))b.hostlists.push(lf);
+      else if(k==='--hostlist-domains'&&!b.domains)b.domains=v||'';
+      else if(k==='--ipset'&&(lf=fileOf(v,'%LISTS%')))b.ipsets.push(lf);
+      else if(EXCL.some(([ek,ef])=>ek===k&&fileOf(v,'%LISTS%')===ef))exSeen.add(k+'|'+fileOf(v,'%LISTS%'));
+      else if(k==='--dpi-desync'&&!b.desync)b.desync=v||'';
+      else if(k==='--dpi-desync-repeats'&&!b.repeats)b.repeats=v||'';
+      else if(k==='--dpi-desync-fooling'&&!b.fooling)b.fooling=v||'';
+      else if(k==='--dpi-desync-split-pos'&&!b.splitpos)b.splitpos=v||'';
+      else if(k==='--dpi-desync-fake-tls'&&(lf=fileOf(v,'%BIN%')))b.fakeTls.push(lf);
+      else if(k==='--dpi-desync-fake-quic'&&!b.fakeQuic&&(lf=fileOf(v,'%BIN%')))b.fakeQuic=lf;
+      else if(k==='--dpi-desync-ttl'&&!b.ttl)b.ttl=v||'';
+      else if(k==='--dpi-desync-autottl'&&!b.autottl)b.autottl=v||'';
+      else if(k==='--dpi-desync-cutoff'&&!b.cutoff)b.cutoff=v||'';
+      else if(k==='--dpi-desync-any-protocol'&&(v==null||v==='1'))b.anyProto=true;
+      else extra.push(tok)}
+    // the standard exclusions are one switch only when all four are present
+    if(exSeen.size===EXCL.length)b.excl=true;else EXCL.forEach(([ek,ef])=>{if(exSeen.has(ek+'|'+ef))extra.push(`${ek}="%LISTS%${ef}"`)});
+    b.extra=extra.join(' ');
+    if(g.length)ed.blocks.push(b)});
+  if(!ed.blocks.length)ed.blocks.push(newBlock());
+  return ed}
+const q=v=>`"${v}"`;
+function blockTokens(b){const o=[];
+  if(b.ports)o.push(`--filter-${b.proto}=${b.ports}`);
+  if(b.l7)o.push('--filter-l7='+b.l7);
+  b.hostlists.forEach(f=>o.push('--hostlist='+q('%LISTS%'+f)));
+  if(b.domains)o.push('--hostlist-domains='+b.domains);
+  b.ipsets.forEach(f=>o.push('--ipset='+q('%LISTS%'+f)));
+  if(b.excl)EXCL.forEach(([k,f])=>o.push(`${k}=${q('%LISTS%'+f)}`));
+  if(b.desync)o.push('--dpi-desync='+b.desync);
+  if(b.repeats)o.push('--dpi-desync-repeats='+b.repeats);
+  if(b.anyProto)o.push('--dpi-desync-any-protocol=1');
+  if(b.cutoff)o.push('--dpi-desync-cutoff='+b.cutoff);
+  if(b.fooling)o.push('--dpi-desync-fooling='+b.fooling);
+  if(b.splitpos)o.push('--dpi-desync-split-pos='+b.splitpos);
+  if(b.ttl)o.push('--dpi-desync-ttl='+b.ttl);
+  if(b.autottl)o.push('--dpi-desync-autottl='+b.autottl);
+  b.fakeTls.forEach(f=>o.push('--dpi-desync-fake-tls='+q('%BIN%'+f)));
+  if(b.fakeQuic)o.push('--dpi-desync-fake-quic='+q('%BIN%'+b.fakeQuic));
+  if(b.extra.trim())o.push(b.extra.trim());
+  return o}
+function composeArgs(){const g=[];if(ED.wfTcp)g.push('--wf-tcp='+ED.wfTcp);if(ED.wfUdp)g.push('--wf-udp='+ED.wfUdp);g.push(...ED.globalsExtra);
+  return [g.concat(blockTokens(ED.blocks[0]||newBlock())).join(' '),...ED.blocks.slice(1).map(b=>blockTokens(b).join(' '))].join(' --new ')}
+function blockSummary(b){return [b.ports?`${b.proto.toUpperCase()} ${b.ports}`:'',b.l7,b.hostlists.map(f=>f.replace(/\.txt$/,'')).join('+'),b.ipsets.length?'ipset':'',b.desync].filter(Boolean).join(' · ')||t('пустой блок')}
+const togChips=(bi,key,opts,sel)=>`<div class="chips">${opts.map(o=>`<span class="chip tog ${sel.includes(o)?'on':''}" data-b="${bi}" data-tk="${key}" data-v="${esc(o)}">${esc(o)}</span>`).join('')}</div>`;
+const csv=s=>s.split(',').map(x=>x.trim()).filter(Boolean);
+function renderEditor(){const host=$('#edBlocks');const open=new Set($$('#edBlocks details[open]').map(d=>+d.dataset.b));
+  const listFiles=edInfo.lists.filter(f=>/^list-/.test(f)&&!/exclude/.test(f)),ipsetFiles=edInfo.lists.filter(f=>/^ipset-/.test(f)&&!/exclude/.test(f));
+  const tlsBins=edInfo.bins.filter(f=>/^(tls_|stun)/.test(f)),quicBins=edInfo.bins.filter(f=>/^quic_/.test(f));
+  host.innerHTML=ED.blocks.map((b,i)=>`<details class="blk" data-b="${i}" ${open.has(i)||(!open.size&&i===0)?'open':''}><summary><span class="n">${t('Блок {0}',i+1)}</span><span class="sm grow" data-sum="${i}">${esc(blockSummary(b))}</span>
+     <button class="btn sm icon ghost" data-mv="-1" data-b="${i}" title="${esc(t('Выше'))}" ${i===0?'disabled':''}>${svg('up')}</button><button class="btn sm icon ghost" data-mv="1" data-b="${i}" title="${esc(t('Ниже'))}" ${i===ED.blocks.length-1?'disabled':''}>${svg('down')}</button><button class="btn sm icon ghost" data-rm="${i}" title="${esc(t('Удалить блок'))}" ${ED.blocks.length<2?'disabled':''}>${svg('x')}</button></summary>
+    <div class="bd">
+     <div class="grid g3"><label class="field"><span>${t('Протокол')}</span><select class="input" data-b="${i}" data-k="proto"><option value="tcp" ${b.proto==='tcp'?'selected':''}>TCP</option><option value="udp" ${b.proto==='udp'?'selected':''}>UDP</option></select></label>
+      <label class="field"><span>${t('Порты')}</span><input class="input mono" data-b="${i}" data-k="ports" value="${esc(b.ports)}" placeholder="80,443"></label>
+      <label class="field"><span>${t('Протокол L7')}</span><input class="input mono" data-b="${i}" data-k="l7" value="${esc(b.l7)}" placeholder="discord,stun"></label></div>
+     <div class="field"><span>${t('Списки доменов (--hostlist)')}</span>${togChips(i,'hostlists',listFiles,b.hostlists)}</div>
+     <div class="grid g2"><label class="field"><span>${t('Домены вручную (--hostlist-domains)')}</span><input class="input mono" data-b="${i}" data-k="domains" value="${esc(b.domains)}" placeholder="discord.media"></label>
+      <div class="field"><span>IPSet (--ipset)</span>${togChips(i,'ipsets',ipsetFiles,b.ipsets)}</div></div>
+     <div class="opt" style="padding:4px 0"><div class="grow"><div class="t">${t('Стандартные исключения')}</div><div class="d">list-exclude, list-exclude-user, ipset-exclude, ipset-exclude-user</div></div><label class="switch"><input type="checkbox" data-b="${i}" data-k="excl" ${b.excl?'checked':''}><i></i></label></div>
+     <div class="field"><span>${t('Метод обхода (--dpi-desync)')}</span><input class="input mono" data-b="${i}" data-k="desync" value="${esc(b.desync)}" placeholder="fake,fakedsplit">${togChips(i,'desync',DESYNC_OPTS,csv(b.desync))}</div>
+     <div class="grid g3"><label class="field"><span>${t('Повторы фейков')}</span><input class="input mono" data-b="${i}" data-k="repeats" value="${esc(b.repeats)}" placeholder="6"></label>
+      <label class="field"><span>${t('Позиция разреза')}</span><input class="input mono" data-b="${i}" data-k="splitpos" value="${esc(b.splitpos)}" placeholder="1,midsld"></label>
+      <label class="field"><span>Cutoff</span><input class="input mono" data-b="${i}" data-k="cutoff" value="${esc(b.cutoff)}" placeholder="n3"></label></div>
+     <div class="field"><span>${t('Обман DPI (--dpi-desync-fooling)')}</span><input class="input mono" data-b="${i}" data-k="fooling" value="${esc(b.fooling)}" placeholder="ts">${togChips(i,'fooling',FOOL_OPTS,csv(b.fooling))}</div>
+     <div class="field"><span>${t('Фейковый TLS ClientHello')}</span>${togChips(i,'fakeTls',tlsBins,b.fakeTls)}</div>
+     <div class="grid g3"><label class="field"><span>${t('Фейковый QUIC')}</span><select class="input" data-b="${i}" data-k="fakeQuic"><option value="">—</option>${quicBins.map(f=>`<option ${f===b.fakeQuic?'selected':''}>${esc(f)}</option>`).join('')}</select></label>
+      <label class="field"><span>TTL</span><input class="input mono" data-b="${i}" data-k="ttl" value="${esc(b.ttl)}" placeholder="—"></label>
+      <label class="field"><span>AutoTTL</span><input class="input mono" data-b="${i}" data-k="autottl" value="${esc(b.autottl)}" placeholder="—"></label></div>
+     <div class="opt" style="padding:4px 0"><div class="grow"><div class="t">${t('Любой протокол')}</div><div class="d">--dpi-desync-any-protocol=1</div></div><label class="switch"><input type="checkbox" data-b="${i}" data-k="anyProto" ${b.anyProto?'checked':''}><i></i></label></div>
+     <label class="field"><span>${t('Прочие параметры')}</span><textarea class="input" rows="2" data-b="${i}" data-k="extra" spellcheck="false">${esc(b.extra)}</textarea></label>
+    </div></details>`).join('');
+  $('#edWfTcp').value=ED.wfTcp;$('#edWfUdp').value=ED.wfUdp;updatePreview()}
+function updatePreview(){$('#edPreview').textContent=composeArgs().replace(/ --new /g,' --new\n').replace(/ --/g,'\n  --');
+  ED.blocks.forEach((b,i)=>{const s=$(`[data-sum="${i}"]`);if(s)s.textContent=blockSummary(b)})}
+function edField(e){const el=e.target;if(el.dataset.g){ED[el.dataset.g]=el.value.trim();updatePreview();return}
+  if(el.dataset.k==null)return;const b=ED.blocks[+el.dataset.b];const k=el.dataset.k;
+  b[k]=el.type==='checkbox'?el.checked:el.value.trim();
+  if(k==='desync'||k==='fooling')el.parentElement.querySelectorAll('.tog').forEach(c=>c.classList.toggle('on',csv(b[k]).includes(c.dataset.v)));
+  updatePreview()}
+const edPage=document.querySelector('[data-page="editor"]');
+edPage.addEventListener('input',edField);edPage.addEventListener('change',edField);
+$('#edBlocks').addEventListener('click',e=>{const c=e.target.closest('.tog');
+  if(c){const b=ED.blocks[+c.dataset.b],k=c.dataset.tk,v=c.dataset.v;
+    if(k==='desync'||k==='fooling'){const arr=csv(b[k]);const i=arr.indexOf(v);i<0?arr.push(v):arr.splice(i,1);b[k]=arr.join(',');const inp=c.closest('.field').querySelector('input');inp.value=b[k]}
+    else{const i=b[k].indexOf(v);i<0?b[k].push(v):b[k].splice(i,1)}
+    c.classList.toggle('on');updatePreview();return}
+  const btn=e.target.closest('button');if(!btn)return;e.preventDefault();
+  if(btn.dataset.rm!=null){ED.blocks.splice(+btn.dataset.rm,1);renderEditor()}
+  if(btn.dataset.mv!=null){const i=+btn.dataset.b,j=i+(+btn.dataset.mv);[ED.blocks[i],ED.blocks[j]]=[ED.blocks[j],ED.blocks[i]];renderEditor()}});
+$('#edAdd').onclick=()=>{ED.blocks.push(newBlock());renderEditor();const d=$$('#edBlocks details');d.forEach(x=>x.open=false);d[d.length-1].open=true;d[d.length-1].scrollIntoView({behavior:'smooth',block:'center'})};
+async function openEditor(base){const z=S.zapret;if(!z||!z.installed){toast(t('Сначала установите zapret'),'err');return}
+  try{edInfo=await api('zapret.editorInfo')}catch(e){}
+  $('#edBase').innerHTML=`<option value="">${t('— пустая —')}</option>`+z.strategies.map(s=>`<option value="${esc(s)}">${esc(pretty(s))}</option>`).join('');
+  edEditing=base&&isCustom(base)?base:null;
+  $('#edDelete').classList.toggle('hidden',!edEditing);
+  $('#edName').value=edEditing?pretty(edEditing):'';
+  const src=base||z.lastStrategy||'general.bat';$('#edBase').value=z.strategies.includes(src)?src:'';
+  go('editor');await edLoadBase()}
+async function edLoadBase(){const bat=$('#edBase').value;
+  if(!bat){ED={wfTcp:'80,443',wfUdp:'443',globalsExtra:[],blocks:[newBlock()]};renderEditor();return}
+  try{ED=parseArgs(await api('zapret.rawArgs',{bat}));renderEditor()}catch(e){toast(e.message,'err')}}
+$('#edLoad').onclick=edLoadBase;
+$('#edCopy').onclick=()=>run(null,()=>api('app.copy',{text:composeArgs()}),t('Скопировано'));
+async function edSave(){const name=$('#edName').value.trim();if(!name){toast(t('Введите название'),'err');$('#edName').focus();return null}
+  const file=`custom (${name}).bat`;let overwrite=file===edEditing;
+  if(!overwrite&&S.zapret.strategies.includes(file)){if(!await confirmBox(t('Перезаписать?'),t('Стратегия <b>{0}</b> уже есть.',esc(name)),t('Перезаписать'),'danger'))return null;overwrite=true}
+  const saved=await api('zapret.saveCustom',{name,args:composeArgs(),overwrite});edEditing=saved;$('#edDelete').classList.remove('hidden');await refresh();return saved}
+$('#edSave').onclick=()=>run($('#edSave'),edSave,r=>r?t('Сохранено: {0}',r):null);
+$('#edSaveRun').onclick=()=>run($('#edSaveRun'),async()=>{const f=await edSave();if(!f)return;await api(S.zapret.mode==='off'?'zapret.start':'zapret.switch',{bat:f});await refresh();return f},r=>r?t('Запущена {0}',pretty(r)):null);
+$('#edSaveTest').onclick=()=>run($('#edSaveTest'),async()=>{const f=await edSave();if(!f)return;go('tests');setTestMode('standard');renderTestList(true);$$('#testList input').forEach(i=>i.checked=i.value===f);await startTest()});
+$('#edDelete').onclick=async()=>{if(!edEditing)return;if(await confirmBox(t('Удалить стратегию?'),t('Файл <b>{0}</b> будет удалён.',esc(edEditing)),t('Удалить'),'danger'))run($('#edDelete'),async()=>{await api('zapret.deleteCustom',{bat:edEditing});await refresh();go('zapret')},t('Стратегия удалена'))};
 
 /* ───────── tests ───────── */
 let testMode='standard';
-const MODE_HINT={standard:'HTTP/1.1, TLS 1.2 и TLS 1.3 к каждой цели из targets.txt + ping. Занимает ~10 с на стратегию.',dpi:'Проверка «заморозки» на 16–20 КБ (типичная блокировка ТСПУ) на наборе хостов hyperion-cs/dpi-checkers. IPSet на время теста переводится в any.'};
-$$('#testMode button').forEach(b=>b.onclick=()=>{testMode=b.dataset.v;setSeg('#testMode',testMode);$('#testModeHint').textContent=MODE_HINT[testMode]});
-$('#testModeHint').textContent=MODE_HINT.standard;
-function renderTestList(){const z=S.zapret;if(!z)return;const el=$('#testList');const sig=z.strategies.join('|');if(el.dataset.sig===sig)return;el.dataset.sig=sig;
-  el.innerHTML=z.strategies.map(s=>`<label class="check"><input type="checkbox" value="${esc(s)}" checked>${esc(pretty(s))}</label>`).join('')||'<span class="muted small" style="padding:8px">Нет стратегий</span>'}
+const MODE_HINT={standard:'HTTP/1.1, TLS 1.2 и TLS 1.3 к каждой цели из targets.txt + ping, плюс голос Discord (UDP). Занимает ~10 с на стратегию.',dpi:'Проверка «заморозки» на 16–20 КБ (типичная блокировка ТСПУ) на наборе хостов hyperion-cs/dpi-checkers. IPSet на время теста переводится в any.',site:'Введите адрес сайта: каждая стратегия будет проверена запросами HTTP/1.1, TLS 1.2 и TLS 1.3 к нему. Не забудьте добавить домен в «Мои домены», если он не входит в списки zapret.'};
+function setTestMode(m){testMode=m;setSeg('#testMode',m);$('#testModeHint').textContent=t(MODE_HINT[m]);$('#siteRow').classList.toggle('hidden',m!=='site')}
+$$('#testMode button').forEach(b=>b.onclick=()=>setTestMode(b.dataset.v));
+setTestMode('standard');
+function renderTestList(force){const z=S.zapret;if(!z)return;const el=$('#testList');const sig=z.strategies.join('|');if(!force&&el.dataset.sig===sig)return;el.dataset.sig=sig;
+  el.innerHTML=z.strategies.map(s=>`<label class="check"><input type="checkbox" value="${esc(s)}" checked>${esc(pretty(s))}${isCustom(s)?' ★':''}</label>`).join('')||`<span class="muted small" style="padding:8px">${t('Нет стратегий')}</span>`}
 $('#tsAll').onclick=()=>$$('#testList input').forEach(i=>i.checked=true);
 $('#tsNone').onclick=()=>$$('#testList input').forEach(i=>i.checked=false);
-$('#testStart').onclick=async()=>{const bats=$$('#testList input:checked').map(i=>i.value);if(!bats.length){toast('Отметьте хотя бы одну стратегию','err');return}
+async function startTest(){const bats=$$('#testList input:checked').map(i=>i.value);if(!bats.length){toast(t('Отметьте хотя бы одну стратегию'),'err');return}
+  const site=$('#siteUrl').value.trim();if(testMode==='site'&&!site){toast(t('Введите адрес сайта'),'err');$('#siteUrl').focus();return}
   const z=S.zapret;
-  if(!await confirmBox('Начать тест?',`Будет проверено стратегий: <b>${bats.length}</b> (~${Math.ceil(bats.length*(testMode==='dpi'?20:11)/60)} мин).\n\nНа время теста текущий обход${z.mode==='service'?' (служба zapret)':''} будет приостановлен, а после — восстановлен автоматически. Интернет в это время может работать нестабильно.`,'Начать'))return;
-  try{await api('test.start',{mode:testMode,bats});testUi(true);results=[];renderResults();$('#testWhen').textContent=''}catch(e){toast(e.message,'err')}};
+  if(!await confirmBox(t('Начать тест?'),t('Будет проверено стратегий: <b>{0}</b> (~{1} мин).',bats.length,Math.ceil(bats.length*(testMode==='dpi'?20:testMode==='site'?7:11)/60))+'\n\n'+t('На время теста текущий обход будет приостановлен, а после — восстановлен автоматически. Интернет в это время может работать нестабильно.')+(z.mode==='service'?' '+t('(служба zapret тоже)'):''),t('Начать')))return;
+  try{await api('test.start',{mode:testMode,bats,site});testUi(true);results=[];resMode=testMode;resSite=testMode==='site'?site:null;renderResults();$('#testWhen').textContent=''}catch(e){toast(e.message,'err')}}
+$('#testStart').onclick=startTest;
+$('#siteUrl').addEventListener('keydown',e=>{if(e.key==='Enter')startTest()});
 $('#testStop').onclick=()=>api('test.cancel');
-function testUi(on){$('#testStart').classList.toggle('hidden',on);$('#testStop').classList.toggle('hidden',!on);$('#testProg').classList.toggle('hidden',!on)}
-let results=[];
+function testUi(isOn){$('#testStart').classList.toggle('hidden',isOn);$('#testStop').classList.toggle('hidden',!isOn);$('#testProg').classList.toggle('hidden',!isOn)}
+let results=[],resMode='standard',resSite=null;
 on('test',m=>{const d=m.data;
   if(m.type==='begin'){testUi(true);$('#testBar').style.width='0'}
-  if(m.type==='progress'){$('#testNow').innerHTML=`Проверяется <b>${esc(pretty(d.name))}</b>`;$('#testCnt').textContent=`${d.index+1} / ${d.total}`;$('#testBar').style.width=(d.index/d.total*100)+'%'}
-  if(m.type==='result'){results.push(d);lastScores[d.name]=d.score;renderResults()}
-  if(m.type==='done'){testUi(false);results=d.results;$('#testBar').style.width='100%';renderResults(true);$('#testWhen').textContent='только что';refresh()}
+  if(m.type==='progress'){$('#testNow').innerHTML=t('Проверяется <b>{0}</b>',esc(pretty(d.name)));$('#testCnt').textContent=`${d.index+1} / ${d.total}`;$('#testBar').style.width=(d.index/d.total*100)+'%'}
+  if(m.type==='result'){results.push(d);if(resMode!=='site')lastScores[d.name]=d.score;renderResults()}
+  if(m.type==='done'){testUi(false);results=d.results;resMode=d.mode;resSite=d.site;$('#testBar').style.width='100%';renderResults(true);$('#testWhen').textContent=t('только что');refresh()}
   if(m.type==='error')toast(d,'err',8000)});
 function scoreColor(s){return s>=90?'linear-gradient(90deg,#19e3cf,#3ef0a3)':s>=50?'linear-gradient(90deg,#ffc35c,#ff9f5c)':'linear-gradient(90deg,#ff5c7a,#ff5fb0)'}
 function cellCls(v){return v==='OK'?'o':v==='UNSUP'?'u':v==='BLOCKED'||v==='SSL'?'w':'e'}
 function renderResults(final){const el=$('#testRes');
-  if(!results.length){el.innerHTML=`<div class="empty">${svg('trophy')}<div>Запустите тест, чтобы найти лучшую стратегию для вашего провайдера</div></div>`;return}
+  $('#testTitle').textContent=resMode==='site'&&resSite?t('Какие стратегии открывают {0}',resSite.replace(/^https?:\/\//,'')):t('Результаты');
+  if(!results.length){el.innerHTML=`<div class="empty">${svg('trophy')}<div>${t('Запустите тест, чтобы найти лучшую стратегию для вашего провайдера')}</div></div>`;return}
   const list=final?results:[...results].sort((a,b)=>b.score-a.score);
-  const best=list[0];
-  el.innerHTML=(final&&best&&best.score>0?`<div class="banner" style="background:linear-gradient(90deg,rgba(62,240,163,.16),rgba(25,227,207,.08));border-color:rgba(62,240,163,.35)">${svg('trophy')}<div class="grow"><b>Лучший результат: ${esc(pretty(best.name))}</b> <span class="muted">— ${best.ok}/${best.total} успешных проверок${best.ping!=null?', ping '+best.ping+' мс':''}</span></div><button class="btn sm pri" data-run="${esc(best.name)}">${svg('play')}Запустить</button><button class="btn sm" data-svc="${esc(best.name)}">${svg('shield')}Как служба</button></div>`:'')+
-  list.map((r,i)=>`<div class="res ${i===0&&r.score>0?'top':''}" data-i="${i}"><div class="rk">${i+1}</div>
-   <div><div style="font-weight:600">${esc(pretty(r.name))}</div><div class="small muted">${r.error?esc(r.error):`${r.ok}/${r.total} успешно${r.blocked?` • ${r.blocked} блокировок 16-20KB`:''}${r.ping!=null?` • ping ~${r.ping} мс`:''}`}</div></div>
-   <div><div class="row small"><span class="grow muted">качество</span><b>${r.score}%</b></div><div class="bar mts"><i style="width:${r.score}%;background:${scoreColor(r.score)}"></i></div></div>
-   <div class="row"><button class="btn sm icon ghost" data-tog="${i}" title="Подробности">${svg('list')}</button><button class="btn sm" data-run="${esc(r.name)}">${svg('play')}</button><button class="btn sm" data-svc="${esc(r.name)}" title="Как служба">${svg('shield')}</button></div>
+  const best=list[0];const opens=list.filter(r=>r.score>=90).length;
+  const banner=final&&resMode==='site'?`<div class="banner" style="${opens?'background:linear-gradient(90deg,rgba(62,240,163,.16),rgba(25,227,207,.08));border-color:rgba(62,240,163,.35)':''}">${svg(opens?'check':'warn')}<div class="grow"><b>${opens?t('Сайт открывается со стратегиями: {0} из {1}',opens,list.length):t('Ни одна стратегия не открыла сайт полностью')}</b>${opens?'':` <span class="muted">${t('Проверьте, что домен есть в «Моих доменах», и попробуйте режим IPSet any.')}</span>`}</div>${opens?`<button class="btn sm pri" data-run="${esc(best.name)}">${svg('play')}${t('Запустить лучшую')}</button>`:''}</div>`
+    :final&&best&&best.score>0?`<div class="banner" style="background:linear-gradient(90deg,rgba(62,240,163,.16),rgba(25,227,207,.08));border-color:rgba(62,240,163,.35)">${svg('trophy')}<div class="grow"><b>${t('Лучший результат: {0}',esc(pretty(best.name)))}</b> <span class="muted">— ${t('{0}/{1} успешных проверок',best.ok,best.total)}${best.ping!=null?t(', ping {0} мс',best.ping):''}</span></div><button class="btn sm pri" data-run="${esc(best.name)}">${svg('play')}${t('Запустить')}</button><button class="btn sm" data-svc="${esc(best.name)}">${svg('shield')}${t('Как служба')}</button></div>`:'';
+  el.innerHTML=banner+list.map((r,i)=>`<div class="res ${i===0&&r.score>0?'top':''}" data-i="${i}"><div class="rk">${i+1}</div>
+   <div><div style="font-weight:600">${esc(pretty(r.name))}</div><div class="small muted">${r.error?esc(r.error):t('{0}/{1} успешно',r.ok,r.total)+(r.blocked?' • '+t('{0} блокировок 16-20KB',r.blocked):'')+(r.ping!=null?' • '+t('ping ~{0} мс',r.ping):'')}</div></div>
+   <div><div class="row small"><span class="grow muted">${t('качество')}</span><b>${r.score}%</b></div><div class="bar mts"><i style="width:${r.score}%;background:${scoreColor(r.score)}"></i></div></div>
+   <div class="row"><button class="btn sm icon ghost" data-tog="${i}" title="${esc(t('Подробности'))}">${svg('list')}</button><button class="btn sm" data-run="${esc(r.name)}" title="${esc(t('Запустить'))}">${svg('play')}</button><button class="btn sm" data-svc="${esc(r.name)}" title="${esc(t('Как служба'))}">${svg('shield')}</button></div>
    <div class="det">${(r.rows||[]).map(row=>`<span class="cell"><b>${esc(row.name)}</b> ${Object.entries(row.checks||{}).map(([k,v])=>`<span class="${cellCls(v)}">${esc(k)}:${esc(v)}</span>`).join(' ')}${row.ping?` <span class="u">${esc(row.ping)}</span>`:''}</span>`).join('')}</div></div>`).join('')}
 $('#testRes').addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)return;
   if(b.dataset.tog!=null)b.closest('.res').classList.toggle('open');
-  if(b.dataset.run)run(b,()=>api('zapret.start',{bat:b.dataset.run}),'Запущена '+pretty(b.dataset.run)).then(refresh);
-  if(b.dataset.svc&&await confirmBox('Установить службу?',`<b>${esc(pretty(b.dataset.svc))}</b> будет запускаться вместе с Windows.`,'Установить'))run(b,()=>api('zapret.installService',{bat:b.dataset.svc}),'Служба установлена').then(refresh)});
+  if(b.dataset.run)run(b,()=>api(S.zapret&&S.zapret.mode==='service'?'zapret.switch':'zapret.start',{bat:b.dataset.run}),t('Запущена {0}',pretty(b.dataset.run))).then(refresh);
+  if(b.dataset.svc&&await confirmBox(t('Установить службу?'),t('<b>{0}</b> будет запускаться вместе с Windows.',esc(pretty(b.dataset.svc))),t('Установить')))run(b,()=>api('zapret.installService',{bat:b.dataset.svc}),t('Служба установлена')).then(refresh)});
 
 let repoRows=[];
 $('#repoScan').onclick=()=>run($('#repoScan'),async()=>{repoRows=await api('zapret.repoScan');renderRepo()});
-function renderRepo(){const lbl={new:['новая','ok'],changed:['изменена','warn'],same:['актуальна',''],local:['только локально','vio']};
+function renderRepo(){const lbl={new:[t('новая'),'ok'],changed:[t('изменена'),'warn'],same:[t('актуальна'),''],local:[t('только локально'),'vio']};
   const any=repoRows.some(r=>r.state==='new'||r.state==='changed');
   $('#repoGet').classList.toggle('hidden',!any);
-  $('#repoList').innerHTML=repoRows.map(r=>`<div class="li"><input type="checkbox" style="accent-color:var(--violet)" value="${esc(r.name)}" ${r.state==='new'||r.state==='changed'?'checked':'disabled'}><div class="grow"><div class="tt">${esc(pretty(r.name))}</div><div class="dd mono">${esc(r.name)}</div></div><span class="chip ${lbl[r.state][1]}">${lbl[r.state][0]}</span></div>`).join('')||'<div class="muted small">Ничего не найдено</div>';
-  if(!any&&repoRows.length)toast('Все стратегии актуальны','ok')}
-$('#repoGet').onclick=()=>run($('#repoGet'),async()=>{const names=$$('#repoList input:checked').map(i=>i.value);const n=await api('zapret.repoDownload',{names});repoRows=await api('zapret.repoScan');renderRepo();await refresh();return n},n=>`Загружено стратегий: ${n}`);
+  $('#repoList').innerHTML=repoRows.map(r=>`<div class="li"><input type="checkbox" style="accent-color:var(--violet)" value="${esc(r.name)}" ${r.state==='new'||r.state==='changed'?'checked':'disabled'}><div class="grow"><div class="tt">${esc(pretty(r.name))}</div><div class="dd mono">${esc(r.name)}</div></div><span class="chip ${lbl[r.state][1]}">${lbl[r.state][0]}</span></div>`).join('')||`<div class="muted small">${t('Ничего не найдено')}</div>`;
+  if(!any&&repoRows.length)toast(t('Все стратегии актуальны'),'ok')}
+$('#repoGet').onclick=()=>run($('#repoGet'),async()=>{const names=$$('#repoList input:checked').map(i=>i.value);const n=await api('zapret.repoDownload',{names});repoRows=await api('zapret.repoScan');renderRepo();await refresh();return n},n=>t('Загружено стратегий: {0}',n));
 
 /* ───────── telegram ───────── */
 async function loadTgConfig(){if(!S.tg||!S.tg.installed)return;try{const c=await api('tg.config');
@@ -802,82 +1654,231 @@ async function loadTgConfig(){if(!S.tg||!S.tg.installed)return;try{const c=await
 const splitList=s=>s.split(/[,\s]+/).map(x=>x.trim()).filter(Boolean);
 $('#cfSave').onclick=()=>run($('#cfSave'),()=>api('tg.saveConfig',{host:$('#cfHost').value,port:+$('#cfPort').value,secret:$('#cfSecret').value,dc_ip:$('#cfDc').value.split('\n').map(s=>s.trim()).filter(Boolean),
   cfproxy:$('#cfCf').checked,h2:$('#cfH2').checked,cfproxy_user_domain_enabled:$('#cfUserOn').checked,cfproxy_user_domain:splitList($('#cfUser').value),cfproxy_worker_enabled:$('#cfWorkOn').checked,cfproxy_worker_domain:splitList($('#cfWork').value),
-  buf_kb:+$('#cfBuf').value,pool_size:+$('#cfPool').value,log_max_mb:+$('#cfLogMb').value,verbose:$('#cfVerbose').checked}),'Сохранено').then(()=>{refresh();loadTgConfig()});
-$('#cfRegen').onclick=async()=>{if(await confirmBox('Новый secret?','После смены secret Telegram нужно будет переподключить по новой ссылке.','Сгенерировать'))run($('#cfRegen'),()=>api('tg.regenSecret'),'Secret обновлён').then(()=>{refresh();loadTgConfig()})};
-$('#tgRestart').onclick=()=>run($('#tgRestart'),()=>api('tg.restart'),'Прокси перезапущен').then(refresh);
-$('#tgStopExt').onclick=()=>run($('#tgStopExt'),()=>api('tg.stop',{external:true}),'Все экземпляры TgWsProxy закрыты').then(refresh);
-async function loadTgLog(){try{const t=await api('tg.log');const el=$('#tgLog');el.textContent=t||'Журнал пуст';el.parentElement.scrollTop=1e9}catch(e){}}
+  buf_kb:+$('#cfBuf').value,pool_size:+$('#cfPool').value,log_max_mb:+$('#cfLogMb').value,verbose:$('#cfVerbose').checked}),t('Сохранено')).then(()=>{refresh();loadTgConfig();loadLan()});
+$('#cfRegen').onclick=async()=>{if(await confirmBox(t('Новый secret?'),t('После смены secret Telegram нужно будет переподключить по новой ссылке.'),t('Сгенерировать')))run($('#cfRegen'),()=>api('tg.regenSecret'),t('Secret обновлён')).then(()=>{refresh();loadTgConfig();loadLan()})};
+$('#tgRestart').onclick=()=>run($('#tgRestart'),()=>api('tg.restart'),t('Прокси перезапущен')).then(refresh);
+$('#tgStopExt').onclick=()=>run($('#tgStopExt'),()=>api('tg.stop',{external:true}),t('Все экземпляры TgWsProxy закрыты')).then(refresh);
+async function loadTgLog(){try{const s=await api('tg.log');const el=$('#tgLog');el.textContent=s||t('Журнал пуст');el.parentElement.scrollTop=1e9}catch(e){}}
 $('#tgLogRefresh').onclick=loadTgLog;$('#tgLogOpen').onclick=()=>run(null,()=>api('app.openPath',{path:'tglog'}));
-function renderDc(d,busy){$('#dcGrid').innerHTML=[1,2,3,4,5].map(n=>{const r=d&&d.find(x=>x.dc===n);return `<div class="dc ${r?(r.ok?'ok':'bad'):''}"><span class="small muted">DC</span><b>${n}</b><span class="small ${r?(r.ok?'':'muted'):'muted'}" title="${esc(r?r.msg:'')}">${busy?'…':r?(r.ok?r.ms+' мс':'ошибка'):'—'}</span></div>`}).join('')}
+function renderDc(d,busy){$('#dcGrid').innerHTML=[1,2,3,4,5].map(n=>{const r=d&&d.find(x=>x.dc===n);return `<div class="dc ${r?(r.ok?'ok':'bad'):''}"><span class="small muted">DC</span><b>${n}</b><span class="small ${r?(r.ok?'':'muted'):'muted'}" title="${esc(r?r.msg:'')}">${busy?'…':r?(r.ok?r.ms+' '+t('мс'):t('ошибка')):'—'}</span></div>`}).join('')}
 renderDc();
-$('#dcTest').onclick=()=>{renderDc(null,true);run($('#dcTest'),async()=>{const d=await api('test.tgdc');renderDc(d);return d},d=>`Доступно ${d.filter(x=>x.ok).length} из ${d.length} DC`)};
+$('#dcTest').onclick=()=>{renderDc(null,true);run($('#dcTest'),async()=>{const d=await api('test.tgdc');renderDc(d);return d},d=>t('Доступно {0} из {1} DC',d.filter(x=>x.ok).length,d.length))};
+
+/* LAN sharing */
+let lanSig='';
+async function loadLan(){try{S.lan=await api('lan.status');renderLan()}catch(e){}}
+function renderLan(){const l=S.lan,el=$('#lanBody');if(!l)return;
+  if(document.activeElement&&el.contains(document.activeElement)&&document.activeElement.tagName==='SELECT')return;
+  $('#lanChip').innerHTML=!l.installed?'':l.shared?`<span class="chip ok"><span class="pulse"></span>${t('раздаётся')}</span>`:`<span class="chip">${t('выключено')}</span>`;
+  const sig=JSON.stringify(l);if(sig===lanSig)return;lanSig=sig;
+  if(!l.installed){el.innerHTML=`<div class="small muted mt">${t('Сначала установите TG WS Proxy.')}</div>`;return}
+  const cands=l.candidates||[];
+  if(!l.shared){el.innerHTML=`<div class="row mt wrap">${cands.length>1?`<select class="input" style="width:auto" id="lanIp">${cands.map(c=>`<option value="${esc(c.ip)}" ${c.ip===l.ip?'selected':''}>${esc(c.ip)} — ${esc(c.adapter)}</option>`).join('')}</select>`:''}<button class="btn tg" id="lanOn">${svg('wifi')}${t('Раздать по Wi-Fi')}</button><span class="small muted">${cands.length?t('Адрес этого ПК в сети: {0}',esc(l.ip)):t('Не найден адрес в локальной сети — подключитесь к Wi-Fi или кабелю')}</span></div>`;
+    const b=$('#lanOn');b.disabled=!cands.length;b.onclick=()=>lanEnable(b);return}
+  const clients=l.clients||[];const others=clients.filter(c=>!c.self);
+  el.innerHTML=`<div class="lan mt"><div class="qr" title="${esc(l.link||'')}">${l.link?QR.svg(l.link,'#0b0a16','#ffffff'):''}</div>
+   <div class="col grow" style="min-width:280px">
+    <div class="small">${t('Отсканируйте код камерой телефона — откроется Telegram с предложением подключить прокси. Телефон должен быть в той же сети, что и компьютер.')}</div>
+    <dl class="kv"><dt>${t('Адрес')}</dt><dd>${cands.length>1?`<select class="input" style="height:30px;width:auto" id="lanIp">${cands.map(c=>`<option value="${esc(c.ip)}" ${c.ip===l.ip?'selected':''}>${esc(c.ip)} — ${esc(c.adapter)}</option>`).join('')}</select>`:`<span class="mono">${esc(l.ip||'—')}</span>`}</dd>
+     <dt>${t('Порт')}</dt><dd class="mono">${l.port}</dd>
+     <dt>${t('Брандмауэр')}</dt><dd>${l.firewall?`<span class="chip ok">${t('порт открыт')}</span>`:`<span class="chip warn">${t('правило не найдено')}</span> <button class="btn sm" id="lanFw">${t('Открыть порт')}</button>`}${l.blockRules?` <span class="chip bad" title="${esc(t('Правила, запрещающие входящие подключения к TgWsProxy.exe'))}">${t('блокирующих правил: {0}',l.blockRules)}</span>`:''}</dd>
+     <dt>${t('Прокси')}</dt><dd>${l.running?`<span class="chip ok">${t('работает')}</span>`:`<span class="chip bad">${t('выключен')}</span>`}</dd></dl>
+    <div class="linkbox"><code>${esc(l.link||'—')}</code><button class="btn sm ghost icon" id="lanCopy" title="${esc(t('Скопировать'))}">${svg('copy')}</button></div>
+    <div><div class="row"><b>${t('Подключено устройств: {0}',others.length)}</b>${clients.some(c=>c.self)?`<span class="small muted">${t('+ этот компьютер')}</span>`:''}</div>
+     <div class="list">${clients.map(c=>`<div class="li" style="padding:8px 4px"><div class="st ok">${svg(c.self?'home':'phone')}</div><div class="grow"><div class="tt">${c.self?t('Этот компьютер'):esc(c.name||c.ip)}</div><div class="dd mono">${esc(c.ip)}</div></div><span class="small muted">${t('соединений: {0}',c.connections)}</span></div>`).join('')||`<div class="small muted mts">${t('Пока никто не подключён')}</div>`}</div></div>
+    <div class="row"><button class="btn sm danger" id="lanOff">${svg('x')}${t('Выключить раздачу')}</button></div>
+   </div></div>`;
+  $('#lanCopy').onclick=()=>run(null,()=>api('app.copy',{text:l.link}),t('Ссылка скопирована'));
+  $('#lanOff').onclick=()=>run($('#lanOff'),async()=>{S.lan=await api('lan.disable');lanSig='';renderLan();refresh();loadTgConfig()},t('Раздача выключена'));
+  const fw=$('#lanFw');if(fw)fw.onclick=()=>lanEnable(fw);
+  const sel=$('#lanIp');if(sel)sel.onchange=()=>run(null,async()=>{S.lan=await api('lan.setIp',{ip:sel.value});lanSig='';renderLan()})}
+async function lanEnable(btn){const l=S.lan;const ip=$('#lanIp')?$('#lanIp').value:l.ip;
+  if(!await confirmBox(t('Раздать прокси по Wi-Fi?'),t('Прокси начнёт принимать подключения из локальной сети, а в брандмауэре Windows откроется порт {0} — только для устройств вашей подсети.\n\nСеть должна быть вашей: в публичном Wi-Fi прокси увидят посторонние.',l.port),t('Раздать')))return;
+  run(btn,async()=>{S.lan=await api('lan.enable',{ip});lanSig='';renderLan();refresh();loadTgConfig()},t('Прокси раздаётся по Wi-Fi'))}
+
+/* ───────── automation ───────── */
+function renderAuto(){const h=S.health;
+  $('#monLast').textContent=h?t('Последняя проверка: {0} — Discord {1}%, YouTube {2}%',h.time,Math.round(h.discord*100),Math.round(h.youtube*100))+(h.voice?', '+t('голос')+' '+(h.voice.ok?'✓':'✗'):'')+(h.online?'':' • '+t('нет интернета')):t('Ещё не проверялось');
+  $('#healHint').textContent=!S.settings.MonitorEnabled&&S.settings.SelfHeal?t('Включите фоновую проверку связи — без неё самовосстановление не запускается.'):t('Перед переключением сбой подтверждается повторной проверкой через 20 секунд, а повторный запуск — не чаще раза в 15 минут.');
+  renderNet()}
+$('#monNow').onclick=()=>checkNow($('#monNow')).then(()=>renderAuto());
+function stratOptions(sel,withNone){const z=S.zapret;return (withNone?`<option value="">${t('— не задана —')}</option>`:'')+(z?z.strategies:[]).map(s=>`<option value="${esc(s)}" ${s===sel?'selected':''}>${esc(pretty(s))}</option>`).join('')}
+function renderNet(){const n=S.net;if(!n)return;const cur=n.current;const profs=n.profiles||[];
+  const cp=cur&&profs.find(p=>p.Id===cur.id);
+  $('#netCur').innerHTML=cur?`<div class="row wrap"><span class="chip tgc">${svg(cur.wifi?'wifi':'cable')}${esc(cur.name)}</span><span class="small muted">${t('текущая сеть')}${cur.adapter?' • '+esc(cur.adapter):''}</span><div class="grow"></div><select class="input" style="width:240px" id="netCurSel">${stratOptions(cp?cp.Strategy:'',true)}</select></div>`:`<div class="small muted">${t('Сеть не определена')}</div>`;
+  const s=$('#netCurSel');if(s)s.onchange=()=>run(null,async()=>{S.net=await api('net.setProfile',{id:cur.id,name:cur.name,strategy:s.value});renderNet();refresh()},t('Сохранено'));
+  const others=profs.filter(p=>!cur||p.Id!==cur.id);
+  $('#netList').innerHTML=others.map(p=>`<div class="li"><div class="st ok" style="color:var(--tg);background:rgba(63,169,255,.1)">${svg('wifi')}</div><div class="grow"><div class="tt">${esc(p.Name)}</div><div class="dd">${t('сохранённая сеть')}</div></div><select class="input" style="width:240px" data-np="${esc(p.Id)}">${stratOptions(p.Strategy,false)}</select><button class="btn sm icon ghost" data-npdel="${esc(p.Id)}" title="${esc(t('Забыть сеть'))}">${svg('trash')}</button></div>`).join('')||(cur?`<div class="small muted">${t('Других сохранённых сетей пока нет')}</div>`:'')}
+$('#netList').addEventListener('change',e=>{const s=e.target.closest('[data-np]');if(s)run(null,async()=>{S.net=await api('net.setProfile',{id:s.dataset.np,strategy:s.value});renderNet()},t('Сохранено'))});
+$('#netList').addEventListener('click',e=>{const b=e.target.closest('[data-npdel]');if(b)run(b,async()=>{S.net=await api('net.setProfile',{id:b.dataset.npdel,strategy:''});renderNet()})});
+on('net',n=>{S.net=n;if(page==='auto')renderNet()});
+
+/* ───────── history ───────── */
+let histHours=24,histData=[],histTimer=null;
+$$('#histRange button').forEach(b=>b.onclick=()=>{histHours=+b.dataset.v;setSeg('#histRange',b.dataset.v);loadHistory()});
+$('#histNow').onclick=()=>checkNow($('#histNow')).then(()=>loadHistory());
+$('#histClear').onclick=async()=>{if(await confirmBox(t('Очистить историю?'),t('Все записи проверок и событий будут удалены.'),t('Очистить'),'danger'))run(null,async()=>{await api('history.clear');histData=[];renderHistory()})};
+async function loadHistory(){try{histData=await api('history.get',{hours:histHours});renderHistory()}catch(e){toast(e.message,'err')}}
+on('history',r=>{if(page!=='history')return;histData.push(r);clearTimeout(histTimer);histTimer=setTimeout(renderHistory,300)});
+window.addEventListener('resize',()=>{if(page==='history'){clearTimeout(histTimer);histTimer=setTimeout(renderHistory,150)}});
+const HC={ok:'#3ef0a3',part:'#ffc35c',bad:'#ff5c7a',off:'rgba(255,255,255,.10)',none:'rgba(255,255,255,.035)'};
+function lvl(v){return v==null?'none':v>=1?'ok':v<=0?'bad':'part'}
+function histSegments(){const checks=histData.filter(r=>r.e==null).sort((a,b)=>a.t-b.t);
+  const maxGap=Math.max(2,S.settings.MonitorInterval||10)*2.2*60e3,now=Date.now();
+  return checks.map((r,i)=>{const nx=checks[i+1];return {r,a:r.t,b:Math.min(nx?nx.t:now,r.t+maxGap)}})}
+function renderHistory(){const box=$('#histChart');const W=Math.max(520,box.clientWidth||900);
+  const lanes=[['s',t('Стратегия')],['d','Discord'],['v',t('Голос Discord')],['y','YouTube']];
+  const L=128,R=10,laneH=26,gap=8,top=4,axisY=top+lanes.length*(laneH+gap)+4,H=axisY+22;
+  const t1=Date.now(),t0=t1-histHours*3600e3,X=v=>L+(Math.max(t0,Math.min(t1,v))-t0)/(t1-t0)*(W-L-R);
+  const segs=histSegments().filter(s=>s.b>t0);const evs=histData.filter(r=>r.e&&r.t>t0);
+  let g='';
+  lanes.forEach(([k,name],li)=>{const y=top+li*(laneH+gap);
+    g+=`<text x="0" y="${y+laneH/2+4}">${esc(name)}</text><rect x="${L}" y="${y}" width="${W-L-R}" height="${laneH}" rx="6" fill="${HC.none}"/>`;
+    if(k==='s'){let prev=null,start=0,end=0,n=0;const flush=()=>{if(prev===null)return;const x1=X(start),x2=X(end),w=Math.max(1,x2-x1-2);
+        const fill=prev===''?HC.off:(n%2?'rgba(139,108,255,.30)':'rgba(139,108,255,.18)');g+=`<rect x="${x1}" y="${y}" width="${w}" height="${laneH}" rx="5" fill="${fill}"/>`;
+        const label=prev===''?t('выключен'):pretty(prev);if(w>label.length*6.5+12)g+=`<text x="${x1+7}" y="${y+laneH/2+4}" style="fill:var(--text)">${esc(label)}</text>`;n++};
+      segs.forEach(s=>{const v=s.r.m==='off'?'':(s.r.s||'?');if(v!==prev||s.a-end>1000){flush();prev=v;start=s.a}end=s.b});flush()}
+    else{// adjacent checks with the same state merge into one bar
+      const runs=[];segs.forEach(s=>{const r=s.r;const c=r.m==='off'||r.n===0?HC.off:HC[lvl(k==='v'?r.v:r[k])];const last=runs[runs.length-1];
+        if(last&&last.c===c&&s.a-last.b<1000)last.b=s.b;else runs.push({a:s.a,b:s.b,c})});
+      runs.filter(x=>x.c!==HC.none).forEach(x=>g+=`<rect x="${X(x.a)}" y="${y}" width="${Math.max(1.5,X(x.b)-X(x.a)-2)}" height="${laneH}" rx="4" fill="${x.c}"/>`)}});
+  // axis
+  const stepH=histHours<=24?3:histHours<=72?12:24;const d=new Date(t0);d.setMinutes(0,0,0);
+  if(stepH===24)d.setHours(0);while(d.getTime()<t0||d.getHours()%stepH!==0)d.setTime(d.getTime()+3600e3);
+  for(;d.getTime()<=t1;d.setTime(d.getTime()+stepH*3600e3)){const x=X(d.getTime());g+=`<line x1="${x}" x2="${x}" y1="${top}" y2="${axisY}" stroke="rgba(255,255,255,.06)"/><text x="${x}" y="${axisY+15}" text-anchor="middle">${stepH===24||d.getHours()===0?ddmm(d.getTime()):hhmm(d.getTime())}</text>`}
+  // events
+  evs.forEach(e=>{const x=X(e.t);const c=e.e==='switch'?'#8b6cff':e.e==='down'?'#ff5c7a':'#ffc35c';g+=`<line x1="${x}" x2="${x}" y1="${top}" y2="${axisY}" stroke="${c}" stroke-width="2" stroke-dasharray="3 3"/><circle cx="${x}" cy="${top+2}" r="4" fill="${c}" stroke="#07060f" stroke-width="2"/>`});
+  g+=`<line id="histCross" x1="0" x2="0" y1="${top}" y2="${axisY}" stroke="rgba(255,255,255,.5)" visibility="hidden"/><rect id="histHit" x="${L}" y="0" width="${W-L-R}" height="${axisY}" fill="transparent"/>`;
+  box.innerHTML=`<svg viewBox="0 0 ${W} ${H}" height="${H}">${g}</svg>`;
+  const hit=$('#histHit'),cross=$('#histCross'),tip=$('#histTip');
+  hit.onmousemove=e=>{const rect=box.getBoundingClientRect();const px=(e.clientX-rect.left)*(W/rect.width);const tt=t0+(px-L)/(W-L-R)*(t1-t0);
+    const s=segs.find(s=>tt>=s.a&&tt<=s.b);cross.setAttribute('x1',px);cross.setAttribute('x2',px);cross.setAttribute('visibility','visible');
+    const ev=evs.filter(e=>Math.abs(X(e.t)-px)<5);
+    const pct=v=>v==null?'—':Math.round(v*100)+'%';
+    let html=`<div class="muted">${ddmm(tt)} ${hhmm(tt)}</div>`;
+    if(s){const r=s.r;html+=`<div class="mts"><b>${r.m==='off'?t('Обход выключен'):esc(pretty(r.s))}</b>${r.n===0?' • '+t('нет интернета'):''}</div><div>Discord: <b>${pct(r.d)}</b></div><div>${t('Голос Discord')}: <b>${r.v==null?'—':r.v?t('работает'):t('не отвечает')}</b></div><div>YouTube: <b>${pct(r.y)}</b></div><div class="small muted">${t('проверка в {0}',hhmm(r.t))}${r.k==='manual'?' • '+t('вручную'):''}</div>`}
+    else html+=`<div class="mts muted">${t('Нет данных')}</div>`;
+    ev.forEach(e=>html+=`<div class="mts">${esc(evText(e))}</div>`);
+    tip.innerHTML=html;tip.style.display='block';const tx=e.clientX-rect.left;tip.style.left=Math.min(tx+14,rect.width-210)+'px';tip.style.top='8px'};
+  hit.onmouseleave=()=>{cross.setAttribute('visibility','hidden');tip.style.display='none'};
+  $('#histLegend').innerHTML=[[HC.ok,t('Работает')],[HC.part,t('Частично')],[HC.bad,t('Не работает')],[HC.off,t('Обход выключен или нет интернета')],['#8b6cff',t('Смена стратегии')],['#ff5c7a',t('Сбой')]].map(([c,l])=>`<span><i style="background:${c}"></i>${l}</span>`).join('');
+  $('#histNote').textContent=segs.length?'':(S.settings.MonitorEnabled?t('Данные появятся после первой фоновой проверки (каждые {0} мин).',S.settings.MonitorInterval):t('Фоновая проверка выключена — включите её на вкладке «Автоматика».'));
+  // availability tiles
+  const valid=segs.filter(s=>s.r.m!=='off'&&s.r.n!==0);const avg=k=>{const v=valid.map(s=>s.r[k]).filter(x=>x!=null);return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length*100)+'%':'—'};
+  const sw=evs.filter(e=>e.e==='switch').length;
+  $('#histStats').innerHTML=[['Discord',avg('d')],[t('Голос Discord'),avg('v')],['YouTube',avg('y')],[t('Смен стратегии'),String(sw)]].map(([k,v])=>`<div class="glass stat"><div class="v">${v}</div><div class="k">${k}</div></div>`).join('');
+  $('#histEvents').innerHTML=evs.slice().reverse().slice(0,60).map(e=>`<div class="li"><div class="st ${e.e==='switch'?'ok':e.e==='down'?'fail':'warn'}">${svg(e.e==='switch'?'refresh':e.e==='down'?'warn':'x')}</div><div class="grow"><div class="tt">${esc(evText(e))}</div></div><span class="small muted">${ddmm(e.t)} ${hhmm(e.t)}</span></div>`).join('')||`<div class="small muted">${t('Событий за период нет')}</div>`}
+function evText(e){const why={manual:t('вручную'),heal:t('самовосстановление'),net:t('профиль сети')}[e.why]||'';
+  if(e.e==='switch')return t('Переключено на {0}',pretty(e.s))+(why?' ('+why+')':'');
+  if(e.e==='down')return t('Пропала связь: {0} (на {1})',e.why||'',pretty(e.s));
+  if(e.e==='heal-fail')return t('Самовосстановление не нашло рабочую стратегию');
+  return e.e}
 
 /* ───────── diagnostics ───────── */
-$('#diagRun').onclick=()=>run($('#diagRun'),async()=>{const r=await api('diag.run');renderDiag(r);const f=r.filter(x=>x.status==='fail').length,w=r.filter(x=>x.status==='warn').length;return [f,w]},([f,w])=>f||w?`Проблем: ${f}, предупреждений: ${w}`:'Всё в порядке');
-function renderDiag(list){$('#diagList').innerHTML=list.map(d=>`<div class="li"><div class="st ${d.status}">${svg(d.status==='ok'?'check':d.status==='warn'?'warn':'x')}</div><div class="grow"><div class="tt">${esc(d.title)}</div><div class="dd">${esc(d.msg)}</div></div>${d.link?`<button class="btn sm ghost" data-url="${esc(d.link)}">${svg('external')}Подробнее</button>`:''}${d.fix?`<button class="btn sm ${d.status==='fail'?'pri':''}" data-fix="${esc(d.fix)}">${esc(d.fixLabel||'Исправить')}</button>`:''}</div>`).join('')}
+const AUTO_FIX=['bfe','tcpts','windivert','conflicts'];let diagRes=[];
+$('#diagRun').onclick=()=>run($('#diagRun'),async()=>{const r=await api('diag.run');renderDiag(r);const f=r.filter(x=>x.status==='fail').length,w=r.filter(x=>x.status==='warn').length;return [f,w]},([f,w])=>f||w?t('Проблем: {0}, предупреждений: {1}',f,w):t('Всё в порядке'));
+function renderDiag(list){diagRes=list;$('#diagList').innerHTML=list.map(d=>`<div class="li"><div class="st ${d.status}">${svg(d.status==='ok'?'check':d.status==='warn'?'warn':'x')}</div><div class="grow"><div class="tt">${esc(d.title)}</div><div class="dd">${esc(d.msg)}</div></div>${d.link?`<button class="btn sm ghost" data-url="${esc(d.link)}">${svg('external')}${t('Подробнее')}</button>`:''}${d.fix?`<button class="btn sm ${d.status==='fail'?'pri':''}" data-fix="${esc(d.fix)}">${esc(d.fixLabel||t('Исправить'))}</button>`:''}</div>`).join('');
+  $('#diagFixAll').disabled=!fixable().length}
+const fixable=()=>diagRes.filter(d=>d.status!=='ok'&&d.fix&&(AUTO_FIX.includes(d.fix)||d.fix==='install_zapret'));
 $('#diagList').addEventListener('click',async e=>{const b=e.target.closest('[data-fix]');if(!b)return;const id=b.dataset.fix;
   if(id==='install_zapret'){go('updates');return}
-  if((id==='conflicts'||id==='windivert')&&!await confirmBox('Удалить конфликтующие службы?','Службы других программ обхода (GoodbyeDPI и т.п.) и драйвер WinDivert будут остановлены и удалены.','Удалить','danger'))return;
-  run(b,()=>api('diag.fix',{id}),r=>r||'Готово').then(()=>$('#diagRun').click())});
-$('#discordCache').onclick=async()=>{if(await confirmBox('Очистить кэш Discord?','Discord будет закрыт, папки Cache, Code Cache и GPUCache удалены (для Stable, PTB, Canary, Development).','Очистить'))run($('#discordCache'),()=>api('diag.discord'),r=>r.join('\n'))};
+  if((id==='conflicts'||id==='windivert')&&!await confirmBox(t('Удалить конфликтующие службы?'),t('Службы других программ обхода (GoodbyeDPI и т.п.) и драйвер WinDivert будут остановлены и удалены.'),t('Удалить'),'danger'))return;
+  run(b,()=>api('diag.fix',{id}),r=>r||t('Готово')).then(()=>$('#diagRun').click())});
+$('#diagFixAll').onclick=async()=>{const list=fixable();if(!list.length)return;
+  if(!await confirmBox(t('Исправить всё?'),t('Будут выполнены действия:')+'\n'+list.map(d=>'• '+esc(d.title)+' — '+esc(d.fixLabel||t('Исправить'))).join('\n')+(list.some(d=>d.fix==='conflicts'||d.fix==='windivert')?'\n\n'+t('Службы других программ обхода и драйвер WinDivert будут удалены.'):''),t('Исправить')))return;
+  run($('#diagFixAll'),async()=>{const r=await api('diag.fixAll');if(list.some(d=>d.fix==='install_zapret'))await updateTool('zapret');return r},r=>r.join('\n')).then(()=>$('#diagRun').click())};
+$('#discordCache').onclick=async()=>{if(await confirmBox(t('Очистить кэш Discord?'),t('Discord будет закрыт, папки Cache, Code Cache и GPUCache удалены (для Stable, PTB, Canary, Development).'),t('Очистить')))run($('#discordCache'),()=>api('diag.discord'),r=>r.join('\n'))};
 
 /* ───────── updates ───────── */
 let progress={};
+const TOOLS=[['zapret','zapret'],['tg','TG WS Proxy'],['hub','Zapret Hub']];
 on('progress',d=>{progress[d.task]=d;renderUpdates()});
 on('updates',u=>{S.updates=u;renderUpdates();renderBanner()});
-function updSummary(u){const a=[];for(const [k,n] of [['zapret','zapret'],['tg','TG WS Proxy']]){const x=u[k];if(x&&x.hasUpdate&&x.local)a.push(n+' '+x.version)}return a.length?'Доступны обновления: '+a.join(', '):'Всё актуально'}
+function updSummary(u){const a=[];for(const [k,n] of TOOLS){const x=u[k];if(x&&x.hasUpdate&&x.local)a.push(n+' '+x.version)}return a.length?t('Доступны обновления: {0}',a.join(', ')):t('Всё актуально')}
 function renderBanner(){const u=S.updates;let html='',n=0;
-  if(u){for(const [k,name] of [['zapret','zapret'],['tg','TG WS Proxy']]){const x=u[k];if(x&&x.hasUpdate&&x.local){n++;html+=`<div class="banner">${svg('rocket')}<div class="grow"><b>Доступно обновление ${name}: ${esc(x.local)} → ${esc(x.version)}</b></div><button class="btn sm pri" data-upd="${k}">${svg('download')}Обновить</button></div>`}}}
+  if(u){for(const [k,name] of TOOLS){const x=u[k];if(x&&x.hasUpdate&&x.local){n++;html+=`<div class="banner">${svg('rocket')}<div class="grow"><b>${t('Доступно обновление {0}: {1} → {2}',name,esc(x.local),esc(x.version))}</b></div><button class="btn sm pri" data-upd="${k}">${svg('download')}${t('Обновить')}</button></div>`}}}
   $('#updBanner').innerHTML=html;const b=$('#updBadge');if(b){b.textContent=n;b.classList.toggle('hidden',!n)}}
 $('#updBanner').addEventListener('click',e=>{const b=e.target.closest('[data-upd]');if(b)updateTool(b.dataset.upd,b)});
+const UPD_DESC={zapret:'Flowseal/zapret-discord-youtube • стратегии, списки, winws',tg:'Flowseal/tg-ws-proxy • MTProto → WebSocket',hub:'prokrastinaciya/ZapretHub • это приложение'};
 function updCard(k,title,icon,installed){const x=S.updates&&S.updates[k];const p=progress[k];const busy=p&&p.pct<100;
-  const local=k==='zapret'?(S.zapret&&S.zapret.version):(S.tg&&S.tg.version);
+  const local=k==='zapret'?(S.zapret&&S.zapret.version):k==='tg'?(S.tg&&S.tg.version):S.app&&S.app.version;
   let state;
-  if(!installed)state='<span class="chip warn">не установлен</span>';
-  else if(!x)state='<span class="chip">не проверялось</span>';
-  else if(x.error)state=`<span class="chip bad" title="${esc(x.error)}">ошибка проверки</span>`;
-  else state=x.hasUpdate?`<span class="chip warn">доступна ${esc(x.version)}</span>`:'<span class="chip ok">актуальная версия</span>';
+  if(!installed)state=`<span class="chip warn">${t('не установлен')}</span>`;
+  else if(!x)state=`<span class="chip">${t('не проверялось')}</span>`;
+  else if(x.error)state=`<span class="chip bad" title="${esc(x.error)}">${t('ошибка проверки')}</span>`;
+  else state=x.hasUpdate?`<span class="chip warn">${t('доступна {0}',esc(x.version))}</span>`:`<span class="chip ok">${t('актуальная версия')}</span>`;
+  const label=!installed?t('Установить'):x&&x.hasUpdate?t('Обновить'):t('Переустановить');
+  const btn=k==='hub'&&!(x&&x.hasUpdate)?'':`<button class="btn ${!installed||(x&&x.hasUpdate)?'pri':''}" data-upd="${k}" ${busy?'disabled':''}>${svg('download')}${label}</button>`;
   return `<div class="row"><h3>${svg(icon)}${title}</h3><div class="grow"></div>${state}</div>
    <div class="row mt"><span class="ver-big">${esc(local||'—')}</span>${x&&x.version&&x.hasUpdate&&installed?`<span class="arrow">→</span><span class="ver-big" style="opacity:.6">${esc(x.version)}</span>`:''}</div>
-   <div class="small muted mts">${k==='zapret'?'Flowseal/zapret-discord-youtube • стратегии, списки, winws':'Flowseal/tg-ws-proxy • MTProto → WebSocket'}</div>
+   <div class="small muted mts">${t(UPD_DESC[k])}</div>
    ${busy?`<div class="mt"><div class="row small"><span class="grow">${esc(p.text)}</span><span>${p.pct}%</span></div><div class="progress mts"><i style="width:${p.pct}%"></i></div></div>`:''}
-   <div class="row mt wrap"><button class="btn ${!installed||(x&&x.hasUpdate)?'pri':''}" data-upd="${k}" ${busy?'disabled':''}>${svg('download')}${!installed?'Установить':x&&x.hasUpdate?'Обновить':'Переустановить'}</button>
-   ${x&&x.page?`<button class="btn ghost" data-url="${esc(x.page)}">${svg('external')}Релиз</button>`:''}</div>
-   ${x&&x.notes&&x.hasUpdate?`<details class="mt"><summary class="small muted" style="cursor:pointer">Что нового</summary><pre class="raw mts" style="max-height:200px;overflow:auto">${esc(x.notes)}</pre></details>`:''}`}
+   <div class="row mt wrap">${btn}
+   ${x&&x.page?`<button class="btn ghost" data-url="${esc(x.page)}">${svg('external')}${t('Релиз')}</button>`:''}</div>
+   ${x&&x.notes&&x.hasUpdate?`<details class="mt"><summary class="small muted" style="cursor:pointer">${t('Что нового')}</summary><pre class="raw mts" style="max-height:200px;overflow:auto">${esc(x.notes)}</pre></details>`:''}`}
 function renderUpdates(){
   // re-render only on change, so an expanded «Что нового» survives the periodic refresh
-  for(const [id,html] of [['#updZ',updCard('zapret','zapret-discord-youtube','bolt',S.zapret&&S.zapret.installed)],['#updT',updCard('tg','TG WS Proxy','send',S.tg&&S.tg.installed)]]){
+  for(const [id,html] of [['#updZ',updCard('zapret','zapret-discord-youtube','bolt',S.zapret&&S.zapret.installed)],['#updT',updCard('tg','TG WS Proxy','send',S.tg&&S.tg.installed)],['#updH',updCard('hub','Zapret Hub','rocket',true)]]){
     const el=$(id);if(el.dataset.html!==html){el.innerHTML=html;el.dataset.html=html}}}
-document.addEventListener('click',e=>{const b=e.target.closest('#updZ [data-upd],#updT [data-upd]');if(b)updateTool(b.dataset.upd,b)});
-async function updateTool(k,btn){if(btn)btn.classList.add('busy');progress[k]={pct:0,text:'Подготовка…'};renderUpdates();
-  try{const v=await api(k==='zapret'?'zapret.update':'tg.update');toast((k==='zapret'?'zapret ':'TG WS Proxy ')+v+' установлен','ok')}catch(e){toast(e.message,'err',8000)}
+document.addEventListener('click',e=>{const b=e.target.closest('#updZ [data-upd],#updT [data-upd],#updH [data-upd]');if(b)updateTool(b.dataset.upd,b)});
+async function updateTool(k,btn){if(btn)btn.classList.add('busy');progress[k]={pct:0,text:t('Подготовка…')};renderUpdates();
+  try{const v=await api(k==='zapret'?'zapret.update':k==='tg'?'tg.update':'hub.update');toast(k==='hub'?t('Zapret Hub {0} установлен — перезапуск…',v):t('{0} {1} установлен',k==='zapret'?'zapret':'TG WS Proxy',v),'ok')}catch(e){toast(e.message,'err',8000)}
   finally{delete progress[k];if(btn)btn.classList.remove('busy');await refresh();renderUpdates();renderBanner()}}
 $('#updCheck').onclick=()=>run($('#updCheck'),()=>api('app.checkUpdates'),r=>updSummary(r));
 $('#zCheckFlag').onchange=e=>run(null,()=>api('zapret.setCheckUpdatesFlag',{on:e.target.checked}));
 
 /* ───────── settings ───────── */
-function renderSettings(){const s=S.settings;$$('[data-set]').forEach(i=>i.checked=!!s[i.dataset.set]);$('#dirZ').value=s.ZapretDir||'';$('#dirT').value=s.TgDir||'';$('#setAutostart').checked=!!S.app.autostart;
-  $('#about').innerHTML=`Zapret Hub ${esc(S.app.version)} — локальный менеджер для zapret-discord-youtube и tg-ws-proxy от Flowseal. Работает без серверов: всё, что приложение скачивает, берётся напрямую из GitHub-репозиториев проектов.<br>Данные: <span class="mono">${esc(S.app.dataDir)}</span>`}
-$$('[data-set]').forEach(i=>i.onchange=()=>run(null,async()=>{S.settings=await api('app.saveSettings',{[i.dataset.set]:i.checked})}));
+const hkLabel=h=>(h||'').replace(/\bD(\d)\b/,'$1').replace(/NumPad(\d)/,'Num $1');
+let hkCapture=false;
+function renderSettings(){const s=S.settings;$$('[data-set]').forEach(i=>i.checked=!!s[i.dataset.set]);$$('[data-sel]').forEach(i=>i.value=String(s[i.dataset.sel]));
+  $('#dirZ').value=s.ZapretDir||'';$('#dirT').value=s.TgDir||'';$('#setAutostart').checked=!!S.app.autostart;$('#setLang').value=s.Language||'';
+  if(!hkCapture)$('#hkInput').value=s.Hotkey?hkLabel(s.Hotkey):t('не задана');
+  $('#hkHint').textContent=s.Hotkey&&!S.app.hotkeyOk?t('Сочетание занято другой программой — выберите другое'):t('Работает везде, даже когда окно скрыто');
+  const i=S.app.install||{};
+  $('#instBox').innerHTML=i.installed?`<div class="small mt">${t('Установлено в')} <span class="mono">${esc(i.dir)}</span></div><div class="small muted mts">${t('Ярлыки — в меню «Пуск» и на рабочем столе. Удалить можно здесь или в «Параметры → Приложения».')}</div><div class="row mt"><button class="btn sm danger" id="uninstBtn">${svg('trash')}${t('Удалить Zapret Hub')}</button></div>`
+    :`<div class="small mt">${t('Portable-версия:')} <span class="mono">${esc(i.exe)}</span></div><div class="small muted mts">${i.installedElsewhere?t('В системе уже установлен Zapret Hub ({0}). Установка заменит его этой версией.',esc(i.dir)):t('Установка скопирует приложение в {0}, добавит ярлыки в «Пуск» и на рабочий стол и деинсталлятор в «Приложения». Настройки сохранятся.',esc(i.dir))}</div><div class="row mt"><button class="btn sm pri" id="instBtn">${svg('download')}${t('Установить в систему')}</button></div>`;
+  const ib=$('#instBtn');if(ib)ib.onclick=()=>installApp(ib);
+  const ub=$('#uninstBtn');if(ub)ub.onclick=async()=>{if(await confirmBox(t('Удалить Zapret Hub?'),t('Откроется деинсталлятор: он закроет Zapret Hub и спросит, удалять ли также службы zapret и настройки.'),t('Удалить'),'danger'))run(ub,()=>api('app.uninstall'))};
+  $('#about').innerHTML=t('Zapret Hub {0} — локальный менеджер для zapret-discord-youtube и tg-ws-proxy от Flowseal. Работает без серверов: всё, что приложение скачивает, берётся напрямую из GitHub-репозиториев проектов.',esc(S.app.version))+`<br>${t('Данные')}: <span class="mono">${esc(S.app.dataDir)}</span>`}
+async function installApp(btn){if(!await confirmBox(t('Установить Zapret Hub?'),t('Приложение будет скопировано в Program Files, появятся ярлыки и деинсталлятор. Zapret Hub перезапустится из новой папки — обход и прокси продолжат работать.'),t('Установить')))return;
+  run(btn,()=>api('app.install'),t('Установлено — перезапуск…'))}
+$$('[data-set]').forEach(i=>i.onchange=()=>run(null,async()=>{S.settings=await api('app.saveSettings',{[i.dataset.set]:i.checked});renderAuto();renderSettings()}));
+$$('[data-sel]').forEach(i=>i.onchange=()=>run(null,async()=>{S.settings=await api('app.saveSettings',{[i.dataset.sel]:+i.value});renderAuto()}));
+$('#setLang').onchange=e=>run(null,async()=>{S.settings=await api('app.saveSettings',{Language:e.target.value})});
 $('#setAutostart').onchange=e=>run(null,async()=>{S.app.autostart=await api('app.setAutostart',{on:e.target.checked});e.target.checked=S.app.autostart});
-$('#dirZPick').onclick=()=>run(null,async()=>{const p=await api('app.pickFolder',{for:'zapret',title:'Папка zapret-discord-youtube'});if(p){S.settings.ZapretDir=p;renderSettings();await refresh();toast('Папка zapret: '+p,'ok')}});
-$('#dirTPick').onclick=()=>run(null,async()=>{const p=await api('app.pickFolder',{for:'tg',title:'Папка для tg-ws-proxy'});if(p){S.settings.TgDir=p;renderSettings();await refresh();toast('Папка прокси: '+p,'ok')}});
+$('#hkInput').onclick=()=>{hkCapture=true;$('#hkInput').value=t('Нажмите сочетание…')};
+$('#hkInput').onblur=()=>{if(hkCapture){hkCapture=false;renderSettings()}};
+$('#hkClear').onclick=()=>run(null,async()=>{await api('app.setHotkey',{hotkey:''});S.settings.Hotkey='';S.app.hotkeyOk=false;renderSettings();renderZ()},t('Горячая клавиша убрана'));
+document.addEventListener('keydown',e=>{if(!hkCapture)return;e.preventDefault();e.stopPropagation();
+  if(['Control','Alt','Shift','Meta'].includes(e.key))return;
+  if(e.key==='Escape'){hkCapture=false;$('#hkInput').blur();renderSettings();return}
+  const mods=[];if(e.ctrlKey)mods.push('Ctrl');if(e.altKey)mods.push('Alt');if(e.shiftKey)mods.push('Shift');if(e.metaKey)mods.push('Win');
+  let k=e.code;if(/^Key[A-Z]$/.test(k))k=k.slice(3);else if(/^Digit\d$/.test(k))k='D'+k.slice(5);else if(/^Numpad\d$/.test(k))k='NumPad'+k.slice(6);else if(!/^F\d{1,2}$/.test(k)){toast(t('Используйте букву, цифру или F1–F12'),'err');return}
+  if(!mods.length&&!/^F\d/.test(k)){toast(t('Добавьте Ctrl, Alt или Shift'),'err');return}
+  if(!mods.length){toast(t('Добавьте Ctrl, Alt или Shift'),'err');return}
+  hkCapture=false;$('#hkInput').blur();const hk=[...mods,k].join('+');
+  run(null,async()=>{await api('app.setHotkey',{hotkey:hk});S.settings.Hotkey=hk;S.app.hotkeyOk=true;renderSettings();renderZ()},t('Горячая клавиша: {0}',hkLabel(hk))).then(()=>renderSettings())},true);
+$('#dirZPick').onclick=()=>run(null,async()=>{const p=await api('app.pickFolder',{for:'zapret',title:t('Папка zapret-discord-youtube')});if(p){S.settings.ZapretDir=p;renderSettings();await refresh();toast(t('Папка zapret: {0}',p),'ok')}});
+$('#dirTPick').onclick=()=>run(null,async()=>{const p=await api('app.pickFolder',{for:'tg',title:t('Папка для tg-ws-proxy')});if(p){S.settings.TgDir=p;renderSettings();await refresh();toast(t('Папка прокси: {0}',p),'ok')}});
 $('#dirZOpen').onclick=()=>run(null,()=>api('app.openPath',{path:'zapret'}));
 $('#dirTOpen').onclick=()=>run(null,()=>api('app.openPath',{path:'tg'}));
 $('#openData').onclick=()=>run(null,()=>api('app.openPath',{path:'data'}));
-$('#quitApp').onclick=async()=>{if(await confirmBox('Выйти из Zapret Hub?','Служба zapret продолжит работать. Запущенные вручную winws и TG WS Proxy тоже продолжат работать в фоне.','Выйти','danger'))api('app.window',{op:'quit'})};
+$('#quitApp').onclick=async()=>{if(await confirmBox(t('Выйти из Zapret Hub?'),t('Служба zapret продолжит работать. Запущенные вручную winws и TG WS Proxy тоже продолжат работать в фоне.'),t('Выйти'),'danger'))api('app.window',{op:'quit'})};
+$('#expBtn').onclick=()=>run($('#expBtn'),()=>api('app.export'),p=>p?t('Сохранено: {0}',p):t('Отменено'));
+$('#impBtn').onclick=()=>run($('#impBtn'),async()=>{const r=await api('app.import');if(!r)return null;const st=await api('app.state');S.app=st;S.settings=st.settings;renderSettings();await refresh();return r},r=>r?t('Импортировано: {0}',r.join(', ')):t('Отменено'));
+$('#repBtn').onclick=()=>run($('#repBtn'),()=>api('app.report'),p=>p?t('Отчёт сохранён: {0}',p):t('Отменено'));
 
 /* ───────── boot ───────── */
 on('refresh',refresh);
 on('window',()=>{});
 async function boot(){hydrate();buildNav();
-  const st=await api('app.state');S.app=st;S.settings=st.settings;S.updates=st.updates;
+  const st=await api('app.state');S.app=st;S.settings=st.settings;S.updates=st.updates;S.net=st.net;S.health=st.health;
   $('#appver').textContent='v'+st.version;
   (st.log||[]).forEach(l=>{logLines.push(l);$('#fullLog').insertAdjacentHTML('beforeend',logHtml(l))});renderMiniLog();
-  const h=new Date().getHours();$('#greet').textContent=h<6?'Доброй ночи':h<12?'Доброе утро':h<18?'Добрый день':'Добрый вечер';
-  go('home');await refresh();renderTestList();renderBanner();renderResults();
-  try{const last=await api('test.last');if(last&&last.results){results=last.results;results.forEach(r=>lastScores[r.name]=r.score);renderResults(true);$('#testWhen').textContent=last.time;renderStrats()}}catch(e){}
-  setInterval(()=>{if(document.visibilityState==='visible'){refresh();renderTestList();if(page==='tg')loadTgLog()}},3000);
+  const h=new Date().getHours();$('#greet').textContent=h<6?t('Доброй ночи'):h<12?t('Доброе утро'):h<18?t('Добрый день'):t('Добрый вечер');
+  go('home');await refresh();renderTestList();renderBanner();renderResults();renderInstallBanner();if(st.health)renderHealth(st.health);
+  try{const last=await api('test.last');if(last&&last.results){results=last.results;resMode=last.mode||'standard';results.forEach(r=>lastScores[r.name]=r.score);renderResults(true);$('#testWhen').textContent=last.time;renderStrats()}}catch(e){}
+  setInterval(()=>{if(document.visibilityState==='visible'){refresh();if(page==='tg'){loadTgLog();loadLan()}}},3000);
   if(st.testing)testUi(true);
 }
 boot();

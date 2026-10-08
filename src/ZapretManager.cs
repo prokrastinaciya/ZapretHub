@@ -90,6 +90,44 @@ namespace ZapretHub
 
         public static bool WinwsRunning() => Process.GetProcessesByName("winws").Length > 0;
 
+        public static bool IsCustom(string bat) => Regex.IsMatch(bat ?? "", @"^custom \(.+\)\.bat$", RegexOptions.IgnoreCase);
+
+        /// <summary>The .bat that is running right now (service or standalone), or null.</summary>
+        public string CurrentStrategy()
+        {
+            if (SvcState("zapret") == "Running") { var s = ServiceStrategy(); return string.IsNullOrEmpty(s) ? null : s + ".bat"; }
+            return WinwsRunning() && !string.IsNullOrEmpty(App.Settings.RunningStrategy) ? App.Settings.RunningStrategy : null;
+        }
+
+        /// <summary>Switches to another strategy keeping the current mode: a running service is reinstalled, otherwise winws is started.</summary>
+        public void SwitchTo(string bat)
+        {
+            if (SvcState("zapret") == "Running") InstallService(bat);
+            else StartStandalone(bat);
+        }
+
+        /// <summary>Hotkey / tray toggle: stops the bypass, or starts the installed service or the last strategy.</summary>
+        public string Toggle()
+        {
+            lock (opLock)
+            {
+                if ((string)Status()["mode"] != "off") { Stop(); return null; }
+                if (SvcState("zapret") != null && !string.IsNullOrEmpty(ServiceStrategy()))
+                {
+                    Shell.Run("sc.exe", "start zapret");
+                    WaitSvc("zapret", ServiceControllerStatus.Running, 6000);
+                    if (SvcState("zapret") != "Running") throw new Exception(L.T("Служба zapret не запустилась", "The zapret service did not start"));
+                    Log.Ok(Src, L.T("Служба zapret запущена", "The zapret service started"));
+                    return ServiceStrategy() + ".bat";
+                }
+                var bat = App.Settings.LastStrategy;
+                if (string.IsNullOrEmpty(bat) || !File.Exists(Path.Combine(Root, bat))) bat = Strategies().FirstOrDefault();
+                if (bat == null) throw new Exception(L.T("Нет стратегий для запуска", "No strategies to start"));
+                StartStandalone(bat);
+                return bat;
+            }
+        }
+
         public string ServiceStrategy()
         {
             try
@@ -109,7 +147,7 @@ namespace ZapretHub
             else if (running)
             {
                 mode = "standalone";
-                strategy = string.IsNullOrEmpty(App.Settings.RunningStrategy) ? "внешний запуск" : App.Settings.RunningStrategy;
+                strategy = string.IsNullOrEmpty(App.Settings.RunningStrategy) ? L.T("внешний запуск", "external launch") : App.Settings.RunningStrategy;
             }
             if (!running && !string.IsNullOrEmpty(App.Settings.RunningStrategy) && svc != "Running")
             {
@@ -130,6 +168,7 @@ namespace ZapretHub
                 ["strategy"] = strategy,
                 ["lastStrategy"] = App.Settings.LastStrategy,
                 ["strategies"] = Strategies(),
+                ["custom"] = Strategies().Where(IsCustom).ToList(),
                 ["gameFilter"] = gf,
                 ["ipset"] = IpsetStatus(),
                 ["ipsetBackup"] = File.Exists(Lists + "ipset-all.txt.backup"),
@@ -177,10 +216,10 @@ namespace ZapretHub
 
         public void SaveGameFilter(string mode, string tcp, string udp)
         {
-            if (!ValidRange(tcp) || !ValidRange(udp)) throw new Exception("Неверный диапазон портов. Пример: 1024-1934,1936-65535");
+            if (!ValidRange(tcp) || !ValidRange(udp)) throw new Exception(L.T("Неверный диапазон портов. Пример: 1024-1934,1936-65535", "Invalid port range. Example: 1024-1934,1936-65535"));
             Directory.CreateDirectory(Utils);
             File.WriteAllText(Utils + "game_filter.enabled", $"mode={mode}\r\ntcp={tcp.Replace(" ", "")}\r\nudp={udp.Replace(" ", "")}\r\n");
-            Log.Ok(Src, $"Game Filter: {mode} (TCP {tcp}, UDP {udp}). Перезапустите стратегию для применения.");
+            Log.Ok(Src, $"Game Filter: {mode} (TCP {tcp}, UDP {udp})" + L.T(". Перезапустите стратегию для применения.", ". Restart the strategy to apply."));
         }
 
         (string tcp, string udp) GameFilterPorts()
@@ -219,13 +258,13 @@ namespace ZapretHub
                     File.WriteAllText(list, "");
                     break;
                 case "loaded":
-                    if (!File.Exists(backup)) throw new Exception("Нет резервной копии списка — сначала обновите IPSet-список.");
+                    if (!File.Exists(backup)) throw new Exception(L.T("Нет резервной копии списка — сначала обновите IPSet-список.", "No list backup — update the IPSet list first."));
                     if (File.Exists(list)) File.Delete(list);
                     File.Move(backup, list);
                     break;
-                default: throw new Exception("Неизвестный режим IPSet: " + target);
+                default: throw new Exception(L.T("Неизвестный режим IPSet: ", "Unknown IPSet mode: ") + target);
             }
-            Log.Ok(Src, "IPSet → " + target + ". Перезапустите стратегию для применения.");
+            Log.Ok(Src, "IPSet → " + target + L.T(". Перезапустите стратегию для применения.", ". Restart the strategy to apply."));
         }
 
         public void SetCheckUpdatesFlag(bool on)
@@ -256,7 +295,7 @@ namespace ZapretHub
 
         string ListPath(string name)
         {
-            if (!EditableLists.TryGetValue(name, out var dir)) throw new Exception("Этот файл нельзя редактировать: " + name);
+            if (!EditableLists.TryGetValue(name, out var dir)) throw new Exception(L.T("Этот файл нельзя редактировать: ", "This file cannot be edited: ") + name);
             return Path.Combine(Root, dir, name);
         }
 
@@ -269,7 +308,7 @@ namespace ZapretHub
             if (name.EndsWith("-user.txt", StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(text))
                 text = name.StartsWith("ipset") ? "203.0.113.113/32\r\n" : "domain.example.abc\r\n"; // winws fails on empty lists
             File.WriteAllText(p, text);
-            Log.Ok(Src, "Сохранён " + name + ". Перезапустите стратегию для применения.");
+            Log.Ok(Src, L.T("Сохранён ", "Saved ") + name + L.T(". Перезапустите стратегию для применения.", ". Restart the strategy to apply."));
         }
 
         public void TcpEnable()
@@ -279,7 +318,7 @@ namespace ZapretHub
             if (line.IndexOf("enabled", StringComparison.OrdinalIgnoreCase) < 0)
             {
                 Shell.Run("netsh.exe", "interface tcp set global timestamps=enabled");
-                Log.Info(Src, "Включены TCP timestamps");
+                Log.Info(Src, L.T("Включены TCP timestamps", "TCP timestamps enabled"));
             }
         }
 
@@ -295,7 +334,7 @@ namespace ZapretHub
                 if (!File.Exists(p)) return null;
                 var h = Misc.Sha256(p);
                 var match = hashes.FirstOrDefault(kv => kv.Value == h);
-                return match.Key == null ? "(свой файл)" : Path.GetFileNameWithoutExtension(match.Key);
+                return match.Key == null ? L.T("(свой файл)", "(custom file)") : Path.GetFileNameWithoutExtension(match.Key);
             }
             return new Dictionary<string, object>
             {
@@ -308,22 +347,22 @@ namespace ZapretHub
         public void ReplaceFake(string type, string name)
         {
             var src = Bin + name + ".bin";
-            if (!File.Exists(src) || name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) throw new Exception("Файл не найден: " + name);
+            if (!File.Exists(src) || name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) throw new Exception(L.T("Файл не найден: ", "File not found: ") + name);
             var dst = Bin + (type == "game" ? "ACTIVE_GAME_UDP.bin" : "ACTIVE_DISCORD_UDP.bin");
             File.Copy(src, dst, true);
-            Log.Ok(Src, $"Активный фейк {(type == "game" ? "GameFilter UDP" : "Discord UDP")} → {name}. Перезапустите стратегию.");
+            Log.Ok(Src, L.T($"Активный фейк {(type == "game" ? "GameFilter UDP" : "Discord UDP")} → {name}. Перезапустите стратегию.", $"Active fake {(type == "game" ? "GameFilter UDP" : "Discord UDP")} → {name}. Restart the strategy."));
         }
 
         // ───────────────────────── strategy parsing & launch ─────────────────────────
 
-        /// <summary>Extracts the winws.exe argument string from a strategy .bat, expanding the variables cmd would expand.</summary>
-        public string BuildArgs(string bat)
+        /// <summary>Extracts the winws.exe argument string from a strategy .bat, keeping %BIN% / %LISTS% / %GameFilter*% as written.</summary>
+        public string RawArgs(string bat)
         {
             var path = Path.Combine(Root, bat);
-            if (!File.Exists(path)) throw new Exception("Стратегия не найдена: " + bat);
+            if (!File.Exists(path) || bat.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) throw new Exception(L.T("Стратегия не найдена: ", "Strategy not found: ") + bat);
             var lines = File.ReadAllText(path).Replace("\r\n", "\n").Split('\n');
             int i = Array.FindIndex(lines, l => l.IndexOf("winws.exe", StringComparison.OrdinalIgnoreCase) >= 0);
-            if (i < 0) throw new Exception("В файле нет вызова winws.exe: " + bat);
+            if (i < 0) throw new Exception(L.T("В файле нет вызова winws.exe: ", "The file does not call winws.exe: ") + bat);
 
             var first = lines[i];
             var p = first.IndexOf("winws.exe\"", StringComparison.OrdinalIgnoreCase);
@@ -347,16 +386,79 @@ namespace ZapretHub
                 if (c == '^' && !q && k + 1 < raw.Length) { outp.Append(raw[++k]); continue; }
                 outp.Append(c);
             }
+            return outp.ToString().Trim();
+        }
 
+        /// <summary>Extracts the winws.exe argument string from a strategy .bat, expanding the variables cmd would expand.</summary>
+        public string BuildArgs(string bat)
+        {
             var (tcp, udp) = GameFilterPorts();
-            var args = outp.ToString()
+            var args = RawArgs(bat)
                 .Replace("%BIN%", Bin).Replace("%LISTS%", Lists)
                 .Replace("%~dp0", Root.TrimEnd('\\') + "\\")
                 .Replace("%GameFilterTCP%", tcp).Replace("%GameFilterUDP%", udp).Replace("%GameFilter%", tcp == "12" ? udp : tcp)
                 .Trim();
             var unknown = Regex.Matches(args, "%[A-Za-z_][A-Za-z0-9_]*%").Cast<Match>().Select(m => m.Value).Distinct().ToList();
-            if (unknown.Count > 0) Log.Warn(Src, $"{bat}: неизвестные переменные {string.Join(", ", unknown)} — стратегия может работать некорректно");
+            if (unknown.Count > 0) Log.Warn(Src, L.T($"{bat}: неизвестные переменные {string.Join(", ", unknown)} — стратегия может работать некорректно", $"{bat}: unknown variables {string.Join(", ", unknown)} — the strategy may misbehave"));
             return args;
+        }
+
+        // ───────────────────────── strategy editor ─────────────────────────
+
+        public Dictionary<string, object> EditorInfo() => new Dictionary<string, object>
+        {
+            ["bins"] = Directory.Exists(Bin) ? Directory.GetFiles(Bin, "*.bin").Select(Path.GetFileName).OrderBy(n => n).ToList() : new List<string>(),
+            ["lists"] = Directory.Exists(Lists) ? Directory.GetFiles(Lists, "*.txt").Select(Path.GetFileName).OrderBy(n => n).ToList() : new List<string>(),
+        };
+
+        static string EscapeForBat(string s)
+        {
+            var sb = new StringBuilder(s.Length + 8);
+            bool q = false;
+            foreach (var c in s)
+            {
+                if (c == '"') q = !q;
+                if (!q && "^&|<>".IndexOf(c) >= 0) sb.Append('^');
+                sb.Append(c);
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>Writes "custom (name).bat" in the same layout as the bundled strategies, so service.bat and the tests treat it alike.</summary>
+        public string SaveCustom(string name, string args, bool overwrite)
+        {
+            EnsureInstalled();
+            name = (name ?? "").Trim();
+            if (!Regex.IsMatch(name, @"^[\p{L}\p{N} _.+\-]{1,40}$"))
+                throw new Exception(L.T("Название: буквы, цифры, пробел и символы _ . + -, до 40 знаков", "Name: letters, digits, spaces and _ . + -, up to 40 characters"));
+            args = Regex.Replace(args ?? "", @"\s+", " ").Trim();
+            if (args.Length == 0) throw new Exception(L.T("Пустой набор аргументов", "The argument set is empty"));
+            if (args.Count(c => c == '"') % 2 != 0) throw new Exception(L.T("Непарная кавычка в аргументах", "Unbalanced quote in the arguments"));
+            if (!Regex.IsMatch(args, @"(^|\s)--(filter-tcp|filter-udp|wf-tcp|wf-udp)")) throw new Exception(L.T("Нужен хотя бы один фильтр --filter-tcp или --filter-udp", "At least one --filter-tcp or --filter-udp is required"));
+            var file = "custom (" + name + ").bat";
+            var path = Path.Combine(Root, file);
+            if (File.Exists(path) && !overwrite) throw new Exception(L.T("Стратегия с таким названием уже есть", "A strategy with this name already exists"));
+
+            var blocks = Regex.Split(args, @"\s--new(?=\s|$)").Select(b => b.Trim()).Where(b => b.Length > 0).ToList();
+            var sb = new StringBuilder();
+            sb.Append("@echo off\r\nchcp 65001 > nul\r\n:: 65001 - UTF-8\r\n:: Created by Zapret Hub\r\n\r\n");
+            sb.Append("cd /d \"%~dp0\"\r\ncall service.bat status_zapret\r\ncall service.bat check_updates\r\ncall service.bat load_game_filter\r\ncall service.bat load_user_lists\r\necho:\r\n\r\n");
+            sb.Append("set \"BIN=%~dp0bin\\\"\r\nset \"LISTS=%~dp0lists\\\"\r\ncd /d %BIN%\r\n\r\n");
+            sb.Append("start \"zapret: %~n0\" /min \"%BIN%winws.exe\" ");
+            sb.Append(string.Join(" --new ^\r\n", blocks.Select(EscapeForBat)));
+            sb.Append("\r\n");
+            File.WriteAllText(path, sb.ToString(), new UTF8Encoding(false));
+            RawArgs(file); // must parse back
+            Log.Ok(Src, L.T("Сохранена стратегия ", "Saved strategy ") + file);
+            return file;
+        }
+
+        public void DeleteCustom(string bat)
+        {
+            if (!IsCustom(bat) || bat.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) throw new Exception(L.T("Удалять можно только свои стратегии", "Only your own strategies can be deleted"));
+            if (CurrentStrategy() == bat) throw new Exception(L.T("Стратегия сейчас запущена — сначала переключитесь на другую", "The strategy is running — switch to another one first"));
+            File.Delete(Path.Combine(Root, bat));
+            Log.Info(Src, L.T("Удалена стратегия ", "Deleted strategy ") + bat);
         }
 
         public void KillWinws()
@@ -396,20 +498,20 @@ namespace ZapretHub
                 EnsureInstalled();
                 if (SvcState("zapret") != null)
                 {
-                    Log.Info(Src, "Служба zapret установлена — удаляю её для переключения на ручной запуск");
+                    Log.Info(Src, L.T("Служба zapret установлена — удаляю её для переключения на ручной запуск", "The zapret service is installed — removing it to switch to manual mode"));
                     RemoveService("zapret");
                 }
                 KillWinws();
                 TcpEnable();
-                Log.Info(Src, "Запуск стратегии " + bat);
+                Log.Info(Src, L.T("Запуск стратегии ", "Starting strategy ") + bat);
                 Launch(bat, WinwsLog);
-                if (!WaitWinws(5000)) throw new Exception("winws.exe не запустился. Смотрите журнал winws и запустите диагностику.");
+                if (!WaitWinws(5000)) throw new Exception(L.T("winws.exe не запустился. Смотрите журнал winws и запустите диагностику.", "winws.exe did not start. Check the winws log and run diagnostics."));
                 Thread.Sleep(700);
-                if (!WinwsRunning()) throw new Exception("winws.exe завершился сразу после запуска:\n" + Misc.TailFile(WinwsLog, 2000));
+                if (!WinwsRunning()) throw new Exception(L.T("winws.exe завершился сразу после запуска:\n", "winws.exe exited right after starting:\n") + Misc.TailFile(WinwsLog, 2000));
                 App.Settings.LastStrategy = bat;
                 App.Settings.RunningStrategy = bat;
                 App.Settings.Save();
-                Log.Ok(Src, "Стратегия " + bat + " запущена");
+                Log.Ok(Src, L.T("Стратегия " + bat + " запущена", "Strategy " + bat + " started"));
             }
         }
 
@@ -425,7 +527,7 @@ namespace ZapretHub
                 KillWinws();
                 App.Settings.RunningStrategy = "";
                 App.Settings.Save();
-                Log.Info(Src, "Обход остановлен");
+                Log.Info(Src, L.T("Обход остановлен", "Bypass stopped"));
             }
         }
 
@@ -464,8 +566,8 @@ namespace ZapretHub
                 App.Settings.RunningStrategy = "";
                 App.Settings.Save();
                 if (SvcState("zapret") != "Running")
-                    throw new Exception("Служба создана, но не запустилась: " + r.All);
-                Log.Ok(Src, "Служба zapret установлена со стратегией " + bat + " (автозапуск с Windows)");
+                    throw new Exception(L.T("Служба создана, но не запустилась: ", "The service was created but did not start: ") + r.All);
+                Log.Ok(Src, L.T("Служба zapret установлена со стратегией " + bat + " (автозапуск с Windows)", "zapret service installed with " + bat + " (starts with Windows)"));
             }
         }
 
@@ -479,13 +581,13 @@ namespace ZapretHub
                 Shell.Run("sc.exe", "stop WinDivert14"); Shell.Run("sc.exe", "delete WinDivert14");
                 App.Settings.RunningStrategy = "";
                 App.Settings.Save();
-                Log.Ok(Src, "Службы zapret и WinDivert удалены");
+                Log.Ok(Src, L.T("Службы zapret и WinDivert удалены", "zapret and WinDivert services removed"));
             }
         }
 
         void EnsureInstalled()
         {
-            if (!Installed) throw new Exception("zapret не установлен. Установите его на вкладке «Обновления» или укажите папку в настройках.");
+            if (!Installed) throw new Exception(L.T("zapret не установлен. Установите его на вкладке «Обновления» или укажите папку в настройках.", "zapret is not installed. Install it on the Updates page or pick its folder in Settings."));
         }
 
         // ───────────────────────── lists & hosts updates ─────────────────────────
@@ -494,13 +596,14 @@ namespace ZapretHub
         {
             EnsureInstalled();
             var text = await Net.Text(RawMain + ".service/ipset-service.txt", 30);
-            if (string.IsNullOrWhiteSpace(text)) throw new Exception("Получен пустой список");
+            if (string.IsNullOrWhiteSpace(text)) throw new Exception(L.T("Получен пустой список", "Received an empty list"));
             text = text.Replace("\r\n", "\n").Replace("\n", "\r\n");
             var status = IpsetStatus();
             // keep the user's mode: when ipset is switched off, refresh the backup instead
             var target = status == "loaded" || status == "missing" ? Lists + "ipset-all.txt" : Lists + "ipset-all.txt.backup";
             File.WriteAllText(target, text);
-            Log.Ok(Src, $"IPSet-список обновлён ({text.Split('\n').Length} записей){(status == "loaded" ? "" : ", режим «" + status + "» сохранён")}");
+            Log.Ok(Src, L.T($"IPSet-список обновлён ({text.Split('\n').Length} записей){(status == "loaded" ? "" : ", режим «" + status + "» сохранён")}",
+                            $"IPSet list updated ({text.Split('\n').Length} entries){(status == "loaded" ? "" : ", mode \"" + status + "\" kept")}"));
         }
 
         static string HostsPath => Path.Combine(Paths.System32, @"drivers\etc\hosts");
@@ -532,7 +635,7 @@ namespace ZapretHub
             text = text.TrimEnd() + "\r\n\r\n" + HostsBegin + "\r\n" + repoText.Replace("\n", "\r\n") + "\r\n" + HostsEnd + "\r\n";
             WriteHosts(text);
             Shell.Run("ipconfig.exe", "/flushdns");
-            Log.Ok(Src, "hosts обновлён (резервная копия: %LOCALAPPDATA%\\ZapretHub\\hosts.backup)");
+            Log.Ok(Src, L.T("hosts обновлён (резервная копия: %LOCALAPPDATA%\\ZapretHub\\hosts.backup)", "hosts updated (backup: %LOCALAPPDATA%\\ZapretHub\\hosts.backup)"));
         }
 
         public void HostsRemove()
@@ -541,7 +644,7 @@ namespace ZapretHub
             if (!text.Contains(HostsBegin)) return;
             WriteHosts(StripManagedBlock(text).TrimEnd() + "\r\n");
             Shell.Run("ipconfig.exe", "/flushdns");
-            Log.Ok(Src, "Блок Zapret Hub удалён из hosts");
+            Log.Ok(Src, L.T("Блок Zapret Hub удалён из hosts", "Zapret Hub block removed from hosts"));
         }
 
         static string StripManagedBlock(string text)
@@ -573,7 +676,7 @@ namespace ZapretHub
             }
             catch (Exception ex)
             {
-                Log.Warn(Src, "GitHub API недоступен (" + ex.Message + "), использую version.txt");
+                Log.Warn(Src, L.T("GitHub API недоступен (", "GitHub API unavailable (") + ex.Message + L.T("), использую version.txt", "), using version.txt"));
             }
             if (version == null)
             {
@@ -603,13 +706,13 @@ namespace ZapretHub
             try
             {
                 var zipPath = Path.Combine(tmp, "zapret.zip");
-                progress("Загрузка zapret " + version, 0);
-                await Net.Download((string)rel["zip"], zipPath, p => progress("Загрузка zapret " + version, p * 0.8));
-                progress("Распаковка", 0.82);
+                progress(L.T("Загрузка zapret ", "Downloading zapret ") + version, 0);
+                await Net.Download((string)rel["zip"], zipPath, p => progress(L.T("Загрузка zapret ", "Downloading zapret ") + version, p * 0.8));
+                progress(L.T("Распаковка", "Extracting"), 0.82);
                 var ex = Path.Combine(tmp, "x");
                 ZipFile.ExtractToDirectory(zipPath, ex);
                 var srcRoot = Directory.GetFiles(ex, "winws.exe", SearchOption.AllDirectories).Select(f => Path.GetDirectoryName(Path.GetDirectoryName(f))).FirstOrDefault();
-                if (srcRoot == null) throw new Exception("В архиве нет bin\\winws.exe");
+                if (srcRoot == null) throw new Exception(L.T("В архиве нет bin\\winws.exe", "The archive has no bin\\winws.exe"));
 
                 lock (opLock)
                 {
@@ -619,29 +722,31 @@ namespace ZapretHub
                     var svcStrategy = wasInstalled && SvcState("zapret") != null ? ServiceStrategy() : null;
                     var standalone = wasInstalled && WinwsRunning() && SvcState("zapret") != "Running" ? App.Settings.RunningStrategy : null;
                     if (!wasInstalled && (SvcState("zapret") != null || WinwsRunning()))
-                        Log.Info(Src, "Обнаружен zapret из другой папки — он не изменён. Чтобы перейти на новую копию, запустите стратегию на вкладке «Стратегии».");
+                        Log.Info(Src, L.T("Обнаружен zapret из другой папки — он не изменён. Чтобы перейти на новую копию, запустите стратегию на вкладке «Стратегии».",
+                                          "Found zapret running from another folder — it was left untouched. Start a strategy on the Strategies page to switch to the new copy."));
 
                     var keep = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
                     if (wasInstalled)
                     {
-                        progress("Остановка обхода", 0.86);
+                        progress(L.T("Остановка обхода", "Stopping the bypass"), 0.86);
                         RemoveService("zapret");
                         KillWinws();
                         RemoveService("WinDivert");
                         foreach (var f in Directory.GetFiles(Lists, "*-user.txt")) keep[f] = File.ReadAllBytes(f);
                         foreach (var f in new[] { Lists + "ipset-all.txt", Lists + "ipset-all.txt.backup", Utils + "game_filter.enabled" })
                             if (File.Exists(f)) keep[f] = File.ReadAllBytes(f);
+                        // bundled strategies are replaced by the new release; the user's own ones stay
                         foreach (var b in Directory.GetFiles(Root, "*.bat"))
-                            if (!Path.GetFileName(b).StartsWith("service", StringComparison.OrdinalIgnoreCase)) File.Delete(b);
+                            if (!Path.GetFileName(b).StartsWith("service", StringComparison.OrdinalIgnoreCase) && !IsCustom(Path.GetFileName(b))) File.Delete(b);
                     }
 
-                    progress("Копирование файлов", 0.9);
+                    progress(L.T("Копирование файлов", "Copying files"), 0.9);
                     Directory.CreateDirectory(Root);
                     Misc.CopyDir(srcRoot, Root);
                     foreach (var kv in keep) File.WriteAllBytes(kv.Key, kv.Value);
                     LoadUserLists();
 
-                    progress("Перезапуск", 0.96);
+                    progress(L.T("Перезапуск", "Restarting"), 0.96);
                     if (!string.IsNullOrEmpty(svcStrategy))
                     {
                         var bat = File.Exists(Path.Combine(Root, svcStrategy + ".bat")) ? svcStrategy + ".bat" : "general.bat";
@@ -653,8 +758,8 @@ namespace ZapretHub
                         StartStandalone(bat);
                     }
                 }
-                progress("Готово", 1);
-                Log.Ok(Src, "zapret " + version + " установлен в " + Root);
+                progress(L.T("Готово", "Done"), 1);
+                Log.Ok(Src, "zapret " + version + L.T(" установлен в ", " installed to ") + Root);
                 return version;
             }
             finally
@@ -670,7 +775,7 @@ namespace ZapretHub
         public async Task<List<Dictionary<string, object>>> RepoScan()
         {
             var arr = Json.Any(await Net.Text($"https://api.github.com/repos/{Repo}/contents/?ref=main")) as object[];
-            if (arr == null) throw new Exception("Неожиданный ответ GitHub");
+            if (arr == null) throw new Exception(L.T("Неожиданный ответ GitHub", "Unexpected GitHub response"));
             var res = new List<Dictionary<string, object>>();
             var remoteNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (Dictionary<string, object> it in arr)
@@ -708,16 +813,16 @@ namespace ZapretHub
                 foreach (Match m in Regex.Matches(text, @"%BIN%([\w\.\-]+)")) if (!File.Exists(Bin + m.Groups[1].Value)) needed.Add("bin/" + m.Groups[1].Value);
                 foreach (Match m in Regex.Matches(text, @"%LISTS%([\w\.\-]+)")) if (!File.Exists(Lists + m.Groups[1].Value)) needed.Add("lists/" + m.Groups[1].Value);
                 n++;
-                Log.Ok(Src, "Загружена стратегия " + name);
+                Log.Ok(Src, L.T("Загружена стратегия ", "Downloaded strategy ") + name);
             }
             foreach (var rel in needed)
             {
                 try
                 {
                     await Net.Download(RawMain + rel, Path.Combine(Root, rel.Replace('/', '\\')));
-                    Log.Info(Src, "Догружен файл " + rel);
+                    Log.Info(Src, L.T("Догружен файл ", "Downloaded file ") + rel);
                 }
-                catch (Exception ex) { Log.Warn(Src, "Не удалось загрузить " + rel + ": " + ex.Message); }
+                catch (Exception ex) { Log.Warn(Src, L.T("Не удалось загрузить ", "Failed to download ") + rel + ": " + ex.Message); }
             }
             return n;
         }

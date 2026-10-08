@@ -11,7 +11,7 @@
     <ApplicationIcon>ui\app.ico</ApplicationIcon>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <Product>Zapret Hub</Product>
     <DebugType>none</DebugType>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
@@ -31,6 +31,7 @@
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Management" />
+    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ui\index.html" LogicalName="ui.index.html" />

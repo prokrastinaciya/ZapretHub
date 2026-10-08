@@ -37,7 +37,7 @@ namespace ZapretHub
                 {
                     File.Copy(TestBackup, Path.Combine(App.Zapret.Lists, "ipset-all.txt"), true);
                     File.Delete(TestBackup);
-                    Log.Warn(Src, "Восстановлен ipset после прерванного теста");
+                    Log.Warn(Src, L.T("Восстановлен ipset после прерванного теста", "Restored ipset after an interrupted test"));
                 }
             }
             catch { }
@@ -104,8 +104,12 @@ namespace ZapretHub
             catch { return "timeout"; }
         }
 
+        /// <summary>Probes plain URLs (no ping) against whatever bypass is currently active.</summary>
+        public static Dictionary<string, object> ProbeUrls(List<(string name, string url)> urls, CancellationToken ct)
+            => ProbeStandard(urls.Select(u => new Target { Name = u.name, Url = u.url }).ToList(), ct, false);
+
         /// <summary>Probes all targets against whatever bypass is currently active.</summary>
-        Dictionary<string, object> ProbeStandard(List<Target> targets, CancellationToken ct)
+        static Dictionary<string, object> ProbeStandard(List<Target> targets, CancellationToken ct, bool voice)
         {
             var jobs = new List<Task<Probe>>();
             var pings = new Dictionary<string, Task<string>>();
@@ -118,7 +122,15 @@ namespace ZapretHub
                             jobs.Add(Task.Run(() => { sem.Wait(ct); try { return CurlStandard(t, v, ct); } finally { sem.Release(); } }, ct));
                     if (t.Ping != null) pings[t.Name] = Task.Run(() => PingMs(t.Ping), ct);
                 }
-                Task.WaitAll(jobs.Cast<Task>().Concat(pings.Values).ToArray());
+                var voiceTask = voice ? HealthVoice(ct) : Task.FromResult<Dictionary<string, object>>(null);
+                Task.WaitAll(jobs.Cast<Task>().Concat(pings.Values).Concat(new Task[] { voiceTask }).ToArray());
+                // Discord voice (UDP) counts as one more check of the strategy
+                var vr = voiceTask.Result;
+                if (vr != null)
+                {
+                    jobs.Add(Task.FromResult(new Probe { Target = "DiscordVoice", Label = "UDP", Status = (bool)vr["ok"] ? "OK" : "ERROR" }));
+                    targets = targets.Concat(new[] { new Target { Name = "DiscordVoice" } }).ToList();
+                }
             }
             var probes = jobs.Select(j => j.Result).ToList();
             var rows = targets.Select(t => new Dictionary<string, object>
@@ -140,6 +152,11 @@ namespace ZapretHub
                 ["pingOk"] = pingVals.Count,
                 ["rows"] = rows,
             };
+        }
+
+        static async Task<Dictionary<string, object>> HealthVoice(CancellationToken ct)
+        {
+            try { return await Voice.Check(ct); } catch { return null; }
         }
 
         async Task<List<Dictionary<string, object>>> DpiSuite()
@@ -200,27 +217,51 @@ namespace ZapretHub
         /// <summary>One-shot health check of the currently active configuration (no strategy switching).</summary>
         public async Task<Dictionary<string, object>> Quick()
         {
-            if (!File.Exists(Paths.Curl)) throw new Exception("curl.exe не найден");
+            if (!File.Exists(Paths.Curl)) throw new Exception(L.T("curl.exe не найден", "curl.exe not found"));
             var targets = App.Zapret.Installed ? StandardTargets() : new List<Target>();
             if (targets.Count == 0) targets = new[] { ("Discord", "https://discord.com"), ("DiscordGateway", "https://gateway.discord.gg"), ("YouTube", "https://www.youtube.com"), ("GoogleVideo", "https://redirector.googlevideo.com") }.Select(x => Convert(x.Item1, x.Item2)).ToList();
-            var res = await Task.Run(() => ProbeStandard(targets, CancellationToken.None));
-            Log.Info(Src, $"Проверка связи: {res["ok"]}/{res["total"]} успешных запросов");
+            var res = await Task.Run(() => ProbeStandard(targets, CancellationToken.None, false));
+            Log.Info(Src, L.T($"Проверка связи: {res["ok"]}/{res["total"]} успешных запросов", $"Connectivity check: {res["ok"]}/{res["total"]} requests succeeded"));
             return res;
         }
 
-        public void Start(string mode, List<string> bats)
+        /// <summary>Normalizes a user-entered site into an https URL.</summary>
+        public static string SiteUrl(string site)
         {
-            if (Running) throw new Exception("Тест уже выполняется");
-            if (!App.Zapret.Installed) throw new Exception("zapret не установлен");
-            if (!File.Exists(Paths.Curl)) throw new Exception("curl.exe не найден — тесты недоступны");
+            site = (site ?? "").Trim();
+            if (site.Length == 0) throw new Exception(L.T("Введите адрес сайта", "Enter a site address"));
+            if (!Regex.IsMatch(site, "^https?://", RegexOptions.IgnoreCase)) site = "https://" + site;
+            if (!Uri.TryCreate(site, UriKind.Absolute, out var u) || u.Host.IndexOf('.') < 0) throw new Exception(L.T("Неверный адрес: ", "Invalid address: ") + site);
+            return u.GetLeftPart(UriPartial.Path).TrimEnd('/');
+        }
+
+        void Prepare(ref List<string> bats)
+        {
+            if (Running) throw new Exception(L.T("Тест уже выполняется", "A test is already running"));
+            if (!App.Zapret.Installed) throw new Exception(L.T("zapret не установлен", "zapret is not installed"));
+            if (!File.Exists(Paths.Curl)) throw new Exception(L.T("curl.exe не найден — тесты недоступны", "curl.exe not found — tests are unavailable"));
             if (bats == null || bats.Count == 0) bats = App.Zapret.Strategies();
             Running = true;
             cts = new CancellationTokenSource();
-            var ct = cts.Token;
-            Task.Run(() => RunAll(mode, bats, ct));
         }
 
-        async Task RunAll(string mode, List<string> bats, CancellationToken ct)
+        /// <summary>mode: standard | dpi | site (site = the address to check).</summary>
+        public void Start(string mode, List<string> bats, string site = null)
+        {
+            if (mode == "site") site = SiteUrl(site);
+            Prepare(ref bats);
+            var ct = cts.Token;
+            Task.Run(() => RunAll(mode, bats, ct, site, false));
+        }
+
+        /// <summary>Self-healing run: tests the candidates on Discord/YouTube and switches to the best one if it works.</summary>
+        public Task<List<Dictionary<string, object>>> RunHeal(List<string> bats)
+        {
+            Prepare(ref bats);
+            return RunAll("heal", bats, cts.Token, null, true);
+        }
+
+        async Task<List<Dictionary<string, object>>> RunAll(string mode, List<string> bats, CancellationToken ct, string site, bool applyBest)
         {
             var z = App.Zapret;
             var results = new List<Dictionary<string, object>>();
@@ -228,17 +269,20 @@ namespace ZapretHub
             var prevStandalone = !svcWasRunning && ZapretManager.WinwsRunning() ? App.Settings.RunningStrategy : null;
             string payload = null;
             bool ipsetSwitched = false;
-            LastMode = mode;
-            void Emit(string type, object data) => App.Emit("test", new Dictionary<string, object> { ["type"] = type, ["data"] = data });
+            var heal = mode == "heal";
+            if (!heal) LastMode = mode;
+            var ranked = new List<Dictionary<string, object>>();
+            void Emit(string type, object data) => App.Emit(heal ? "heal" : "test", new Dictionary<string, object> { ["type"] = type, ["data"] = data });
+            var modeName = mode == "dpi" ? "DPI 16-20KB" : mode == "site" ? site : heal ? L.T("самовосстановление", "self-healing") : L.T("стандартный", "standard");
 
             try
             {
-                Log.Info(Src, $"Тест стратегий ({(mode == "dpi" ? "DPI 16-20KB" : "стандартный")}): {bats.Count} шт.");
+                Log.Info(Src, L.T($"Тест стратегий ({modeName}): {bats.Count} шт.", $"Strategy test ({modeName}): {bats.Count}"));
                 List<Target> targets = null; List<Dictionary<string, object>> suite = null;
                 if (mode == "dpi")
                 {
                     suite = await DpiSuite();
-                    if (suite.Count == 0) throw new Exception("Не удалось загрузить набор DPI-целей");
+                    if (suite.Count == 0) throw new Exception(L.T("Не удалось загрузить набор DPI-целей", "Could not load the DPI target suite"));
                     payload = Path.GetTempFileName();
                     var bytes = new byte[65536]; new Random().NextBytes(bytes); File.WriteAllBytes(payload, bytes);
                     if (z.IpsetStatus() == "loaded" || z.IpsetStatus() == "none")
@@ -248,11 +292,14 @@ namespace ZapretHub
                         ipsetSwitched = true;
                     }
                 }
+                else if (mode == "site") targets = new List<Target> { Convert(new Uri(site).Host, site) };
+                else if (heal) targets = HealthMonitor.HealTargets().Select(x => new Target { Name = x.Split('|')[0], Url = x.Split('|')[1] }).ToList();
                 else targets = StandardTargets();
+                var voice = mode == "standard" && App.Settings.CheckVoice;
 
                 if (svcWasRunning)
                 {
-                    Log.Info(Src, "Служба zapret временно остановлена на время теста");
+                    Log.Info(Src, L.T("Служба zapret временно остановлена на время теста", "The zapret service is paused for the test"));
                     Shell.Run("sc.exe", "stop zapret");
                     Thread.Sleep(1500);
                 }
@@ -268,9 +315,9 @@ namespace ZapretHub
                     try
                     {
                         z.Launch(bat, Paths.File("winws-test.log"));
-                        if (!ZapretManager.WaitWinws(5000)) throw new Exception("winws не запустился");
+                        if (!ZapretManager.WaitWinws(5000)) throw new Exception(L.T("winws не запустился", "winws did not start"));
                         Thread.Sleep(800);
-                        r = mode == "dpi" ? ProbeDpi(suite, payload, ct) : ProbeStandard(targets, ct);
+                        r = mode == "dpi" ? ProbeDpi(suite, payload, ct) : ProbeStandard(targets, ct, voice);
                     }
                     catch (OperationCanceledException) { throw; }
                     catch (AggregateException ae) when (ae.InnerExceptions.Any(e => e is OperationCanceledException)) { throw new OperationCanceledException(); }
@@ -283,15 +330,15 @@ namespace ZapretHub
                     Emit("result", r);
                     Log.Write((double)r["score"] >= 90 ? "ok" : (double)r["score"] >= 50 ? "warn" : "err", Src, $"{bat}: {r["ok"]}/{r["total"]}" + (r.ContainsKey("error") ? " — " + r["error"] : ""));
                 }
-                Log.Ok(Src, "Тест завершён");
+                Log.Ok(Src, L.T("Тест завершён", "Test finished"));
             }
             catch (Exception ex) when (ex is OperationCanceledException || ct.IsCancellationRequested)
             {
-                Log.Warn(Src, "Тест прерван");
+                Log.Warn(Src, L.T("Тест прерван", "Test cancelled"));
             }
             catch (Exception ex)
             {
-                Log.Err(Src, "Ошибка теста: " + ex.Message);
+                Log.Err(Src, L.T("Ошибка теста: ", "Test error: ") + ex.Message);
                 Emit("error", ex.Message);
             }
             finally
@@ -303,26 +350,34 @@ namespace ZapretHub
                     File.Delete(TestBackup);
                 }
                 if (payload != null) try { File.Delete(payload); } catch { }
+                ranked = results.OrderByDescending(r => (double)r["score"]).ThenByDescending(r => r.ContainsKey("pingOk") ? (int)r["pingOk"] : 0).ToList();
+                var best = applyBest && !ct.IsCancellationRequested && ranked.Count > 0 && (double)ranked[0]["score"] >= 90 ? (string)ranked[0]["name"] : null;
                 try
                 {
-                    if (svcWasRunning) { Shell.Run("sc.exe", "start zapret"); Log.Info(Src, "Служба zapret снова запущена"); }
+                    if (best != null && svcWasRunning) z.InstallService(best);
+                    else if (best != null) z.StartStandalone(best);
+                    else if (svcWasRunning) { Shell.Run("sc.exe", "start zapret"); Log.Info(Src, L.T("Служба zapret снова запущена", "The zapret service is running again")); }
                     else if (!string.IsNullOrEmpty(prevStandalone)) z.StartStandalone(prevStandalone);
                     else { App.Settings.RunningStrategy = ""; App.Settings.Save(); }
                 }
-                catch (Exception ex) { Log.Err(Src, "Не удалось восстановить прежний режим: " + ex.Message); }
+                catch (Exception ex) { Log.Err(Src, L.T("Не удалось восстановить прежний режим: ", "Could not restore the previous mode: ") + ex.Message); }
 
-                var ranked = results.OrderByDescending(r => (double)r["score"]).ThenByDescending(r => r.ContainsKey("pingOk") ? (int)r["pingOk"] : 0).ToList();
-                Last = ranked;
-                try { File.WriteAllText(Paths.File("last-test.json"), Json.Ser(new { mode, time = DateTime.Now.ToString("dd.MM.yyyy HH:mm"), results = ranked })); } catch { }
+                if (!heal)
+                {
+                    Last = ranked;
+                    try { File.WriteAllText(Paths.File(mode == "site" ? "last-site-test.json" : "last-test.json"), Json.Ser(new { mode, site, time = DateTime.Now.ToString("dd.MM.yyyy HH:mm"), results = ranked })); } catch { }
+                }
                 Running = false;
-                Emit("done", new Dictionary<string, object> { ["results"] = ranked, ["mode"] = mode });
-                App.Notify("Тест стратегий завершён", ranked.Count > 0 ? $"Лучшая: {ranked[0]["name"]} ({ranked[0]["score"]}%)" : "Нет результатов");
+                Emit("done", new Dictionary<string, object> { ["results"] = ranked, ["mode"] = mode, ["site"] = site });
+                if (!heal)
+                    App.Notify(L.T("Тест стратегий завершён", "Strategy test finished"), ranked.Count > 0 ? L.T($"Лучшая: {ranked[0]["name"]} ({ranked[0]["score"]}%)", $"Best: {ranked[0]["name"]} ({ranked[0]["score"]}%)") : L.T("Нет результатов", "No results"));
             }
+            return ranked;
         }
 
-        public object LastSaved()
+        public object LastSaved(bool site = false)
         {
-            try { var f = Paths.File("last-test.json"); return File.Exists(f) ? Json.Any(File.ReadAllText(f)) : null; } catch { return null; }
+            try { var f = Paths.File(site ? "last-site-test.json" : "last-test.json"); return File.Exists(f) ? Json.Any(File.ReadAllText(f)) : null; } catch { return null; }
         }
     }
 }

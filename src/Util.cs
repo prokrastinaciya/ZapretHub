@@ -16,6 +16,13 @@ using System.Web.Script.Serialization;
 
 namespace ZapretHub
 {
+    /// <summary>Picks the Russian or English variant of a user-facing string.</summary>
+    static class L
+    {
+        public static bool En => App.Settings != null && App.Settings.EffectiveLang() == "en";
+        public static string T(string ru, string en) => En ? en : ru;
+    }
+
     static class Json
     {
         static readonly JavaScriptSerializer S = new JavaScriptSerializer { MaxJsonLength = int.MaxValue, RecursionLimit = 256 };
@@ -149,7 +156,7 @@ namespace ZapretHub
         public static void Open(string target)
         {
             try { Process.Start(new ProcessStartInfo(target) { UseShellExecute = true })?.Dispose(); }
-            catch (Exception ex) { Log.Err("app", "Не удалось открыть " + target + ": " + ex.Message); }
+            catch (Exception ex) { Log.Err("app", L.T("Не удалось открыть ", "Could not open ") + target + ": " + ex.Message); }
         }
 
         /// <summary>Quotes one argument following the MSVCRT / CommandLineToArgvW rules.</summary>
@@ -179,7 +186,7 @@ namespace ZapretHub
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | (SecurityProtocolType)12288;
             var h = new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate, AllowAutoRedirect = true };
             Http = new HttpClient(h) { Timeout = TimeSpan.FromSeconds(40) };
-            Http.DefaultRequestHeaders.UserAgent.ParseAdd("ZapretHub/1.0");
+            Http.DefaultRequestHeaders.UserAgent.ParseAdd("ZapretHub/" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(3));
         }
 
         public static async Task<string> Text(string url, int timeoutSec = 15)
@@ -210,7 +217,7 @@ namespace ZapretHub
         {
             using (var resp = await Http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct).ConfigureAwait(false))
             {
-                if (!resp.IsSuccessStatusCode) throw new Exception($"HTTP {(int)resp.StatusCode} при загрузке {url}");
+                if (!resp.IsSuccessStatusCode) throw new Exception($"HTTP {(int)resp.StatusCode}" + L.T(" при загрузке ", " while downloading ") + url);
                 var total = resp.Content.Headers.ContentLength ?? -1;
                 Directory.CreateDirectory(Path.GetDirectoryName(dest));
                 var tmp = dest + ".part";
@@ -336,5 +343,15 @@ namespace ZapretHub
         }
 
         public static bool HasCyrillic(string s) => Regex.IsMatch(s ?? "", "[Ѐ-ӿ]");
+
+        public static bool IsPrivate(IPAddress a)
+        {
+            if (a.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork) return false;
+            var b = a.GetAddressBytes();
+            return b[0] == 10 || (b[0] == 172 && b[1] >= 16 && b[1] <= 31) || (b[0] == 192 && b[1] == 168);
+        }
+
+        public static string Redact(string text, string secret)
+            => string.IsNullOrEmpty(secret) || text == null ? text : text.Replace(secret, "<secret>");
     }
 }

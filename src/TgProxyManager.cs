@@ -58,7 +58,7 @@ namespace ZapretHub
                 Dictionary<string, object> cfg = null;
                 if (File.Exists(appdata))
                 {
-                    try { cfg = Json.Obj(File.ReadAllText(appdata)); Log.Info(Src, "Импортирован конфиг из %APPDATA%\\TgWsProxy"); } catch { }
+                    try { cfg = Json.Obj(File.ReadAllText(appdata)); Log.Info(Src, L.T("Импортирован конфиг из %APPDATA%\\TgWsProxy", "Imported the config from %APPDATA%\\TgWsProxy")); } catch { }
                 }
                 cfg = cfg ?? new Dictionary<string, object>
                 {
@@ -94,12 +94,12 @@ namespace ZapretHub
         {
             var cfg = Config();
             var port = upd.Int("port", cfg.Int("port", 1443));
-            if (port < 1 || port > 65535) throw new Exception("Порт должен быть от 1 до 65535");
+            if (port < 1 || port > 65535) throw new Exception(L.T("Порт должен быть от 1 до 65535", "The port must be between 1 and 65535"));
             var secret = upd.Str("secret", cfg.Str("secret")).Trim().ToLowerInvariant();
-            if (secret.Length != 32 || !secret.All(Uri.IsHexDigit)) throw new Exception("Secret должен состоять из 32 hex-символов");
+            if (secret.Length != 32 || !secret.All(Uri.IsHexDigit)) throw new Exception(L.T("Secret должен состоять из 32 hex-символов", "The secret must be 32 hex characters"));
             var dcs = upd.ContainsKey("dc_ip") ? upd.List("dc_ip").Select(s => s.Trim()).Where(s => s.Length > 0).ToList() : cfg.List("dc_ip");
             foreach (var d in dcs)
-                if (!System.Text.RegularExpressions.Regex.IsMatch(d, @"^\d+:[\d\.]+$")) throw new Exception("Неверный формат DC:IP — " + d);
+                if (!System.Text.RegularExpressions.Regex.IsMatch(d, @"^\d+:[\d\.]+$")) throw new Exception(L.T("Неверный формат DC:IP — ", "Invalid DC:IP format — ") + d);
 
             cfg["host"] = upd.Str("host", cfg.Str("host", "127.0.0.1")).Trim();
             cfg["port"] = port;
@@ -115,7 +115,7 @@ namespace ZapretHub
             cfg["check_updates"] = false;
             cfg["autostart"] = false;
             File.WriteAllText(ConfigPath, Json.Ser(cfg));
-            Log.Ok(Src, "Настройки прокси сохранены");
+            Log.Ok(Src, L.T("Настройки прокси сохранены", "Proxy settings saved"));
             if (OwnProcesses().Count > 0) Restart();
         }
 
@@ -123,21 +123,8 @@ namespace ZapretHub
         {
             var c = Config();
             var host = c.Str("host", "127.0.0.1");
-            if (host == "0.0.0.0") host = LocalIp() ?? "127.0.0.1";
+            if (host == "0.0.0.0") host = "127.0.0.1"; // this link is for Telegram on this PC; LAN devices get theirs from Lan
             return $"tg://proxy?server={host}&port={c.Int("port", 1443)}&secret=dd{c.Str("secret")}";
-        }
-
-        static string LocalIp()
-        {
-            try
-            {
-                using (var s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
-                {
-                    s.Connect("8.8.8.8", 80);
-                    return ((System.Net.IPEndPoint)s.LocalEndPoint).Address.ToString();
-                }
-            }
-            catch { return null; }
         }
 
         public string Version()
@@ -195,16 +182,16 @@ namespace ZapretHub
 
         public void Start()
         {
-            if (!Installed) throw new Exception("TG WS Proxy не установлен — установите его кнопкой «Установить».");
+            if (!Installed) throw new Exception(L.T("TG WS Proxy не установлен — установите его кнопкой «Установить».", "TG WS Proxy is not installed — install it with the Install button."));
             if (OwnProcesses().Count > 0) return;
             if (AllProxyProcesses().Any())
-                throw new Exception("Запущен другой экземпляр TgWsProxy (не из Zapret Hub). Остановите его кнопкой «Закрыть сторонний» или через трей.");
+                throw new Exception(L.T("Запущен другой экземпляр TgWsProxy (не из Zapret Hub). Остановите его кнопкой «Закрыть сторонний» или через трей.", "Another TgWsProxy instance is running (not started by Zapret Hub). Stop it with \"Close external\" or from its tray icon."));
             EnsureConfig();
             Process.Start(new ProcessStartInfo(Exe) { WorkingDirectory = Dir, UseShellExecute = false })?.Dispose();
             var sw = Stopwatch.StartNew();
             while (sw.ElapsedMilliseconds < 8000 && !PortOpen()) Thread.Sleep(250);
-            if (PortOpen()) Log.Ok(Src, "TG WS Proxy запущен — " + Link().Replace("tg://proxy?", ""));
-            else Log.Warn(Src, "Процесс запущен, но порт пока не отвечает. Проверьте журнал прокси.");
+            if (PortOpen()) Log.Ok(Src, L.T("TG WS Proxy запущен — ", "TG WS Proxy started — ") + Link().Replace("tg://proxy?", ""));
+            else Log.Warn(Src, L.T("Процесс запущен, но порт пока не отвечает. Проверьте журнал прокси.", "The process started, but the port does not answer yet. Check the proxy log."));
         }
 
         public void Stop(bool external = false)
@@ -215,7 +202,7 @@ namespace ZapretHub
                 try { p.Kill(); p.WaitForExit(4000); } catch { }
             }
             try { foreach (var f in Directory.GetFiles(DataDir, "*.lock")) File.Delete(f); } catch { }
-            if (list.Count > 0) Log.Info(Src, external ? "Все экземпляры TgWsProxy остановлены" : "TG WS Proxy остановлен");
+            if (list.Count > 0) Log.Info(Src, external ? L.T("Все экземпляры TgWsProxy остановлены", "All TgWsProxy instances stopped") : L.T("TG WS Proxy остановлен", "TG WS Proxy stopped"));
         }
 
         public void Restart() { Stop(); Thread.Sleep(400); Start(); }
@@ -225,7 +212,7 @@ namespace ZapretHub
             var c = Config();
             c["secret"] = Misc.RandomHex(16);
             SaveConfig(c);
-            Log.Info(Src, "Сгенерирован новый secret — переподключите Telegram по новой ссылке");
+            Log.Info(Src, L.T("Сгенерирован новый secret — переподключите Telegram по новой ссылке", "New secret generated — reconnect Telegram with the new link"));
         }
 
         public async Task<Dictionary<string, object>> LatestRelease()
@@ -242,7 +229,7 @@ namespace ZapretHub
                 var i = final.LastIndexOf("/tag/", StringComparison.Ordinal);
                 if (i >= 0) tag = Uri.UnescapeDataString(final.Substring(i + 5));
             }
-            if (string.IsNullOrEmpty(tag)) throw new Exception("Не удалось определить последнюю версию TG WS Proxy");
+            if (string.IsNullOrEmpty(tag)) throw new Exception(L.T("Не удалось определить последнюю версию TG WS Proxy", "Could not determine the latest TG WS Proxy version"));
             return new Dictionary<string, object>
             {
                 ["version"] = Ver.Clean(tag),
@@ -267,9 +254,9 @@ namespace ZapretHub
             var rel = await LatestRelease();
             var ver = (string)rel["version"];
             var tmp = Path.Combine(Path.GetTempPath(), "TgWsProxy-" + Guid.NewGuid().ToString("N").Substring(0, 8) + ".exe");
-            await Net.Download((string)rel["url"], tmp, p => progress("Загрузка TG WS Proxy " + ver, p * 0.9));
+            await Net.Download((string)rel["url"], tmp, p => progress(L.T("Загрузка TG WS Proxy ", "Downloading TG WS Proxy ") + ver, p * 0.9));
             var wasRunning = OwnProcesses().Count > 0;
-            progress("Установка", 0.92);
+            progress(L.T("Установка", "Installing"), 0.92);
             Stop();
             Directory.CreateDirectory(Dir);
             Misc.CopyWithRetry(tmp, Exe);
@@ -278,8 +265,8 @@ namespace ZapretHub
             App.Settings.TgVersion = ver;
             App.Settings.Save();
             if (wasRunning) Start();
-            progress("Готово", 1);
-            Log.Ok(Src, "TG WS Proxy " + ver + " установлен в " + Dir);
+            progress(L.T("Готово", "Done"), 1);
+            Log.Ok(Src, "TG WS Proxy " + ver + L.T(" установлен в ", " installed to ") + Dir);
             return ver;
         }
 
@@ -304,14 +291,14 @@ namespace ZapretHub
             {
                 // prefer IPv4: a dead IPv6 route makes the default dual-stack connect hang
                 var addrs = System.Net.Dns.GetHostAddresses(host).OrderBy(a => a.AddressFamily == AddressFamily.InterNetwork ? 0 : 1).ToArray();
-                if (addrs.Length == 0) return (false, "DNS не вернул адрес", sw.ElapsedMilliseconds);
+                if (addrs.Length == 0) return (false, L.T("DNS не вернул адрес", "DNS returned no address"), sw.ElapsedMilliseconds);
                 using (var tcp = new TcpClient(addrs[0].AddressFamily))
                 {
-                    if (!tcp.ConnectAsync(addrs[0], 443).Wait(5000)) return (false, "таймаут TCP", sw.ElapsedMilliseconds);
+                    if (!tcp.ConnectAsync(addrs[0], 443).Wait(5000)) return (false, L.T("таймаут TCP", "TCP timeout"), sw.ElapsedMilliseconds);
                     using (var ssl = new SslStream(tcp.GetStream(), false))
                     {
                         ssl.ReadTimeout = 5000; ssl.WriteTimeout = 5000;
-                        if (!ssl.AuthenticateAsClientAsync(host).Wait(5000)) return (false, "таймаут TLS", sw.ElapsedMilliseconds);
+                        if (!ssl.AuthenticateAsClientAsync(host).Wait(5000)) return (false, L.T("таймаут TLS", "TLS timeout"), sw.ElapsedMilliseconds);
                         var key = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
                         var req = $"GET {path} HTTP/1.1\r\nHost: {host}\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Key: {key}\r\nSec-WebSocket-Version: 13\r\nSec-WebSocket-Protocol: binary\r\n\r\n";
                         var b = Encoding.ASCII.GetBytes(req);
@@ -324,7 +311,7 @@ namespace ZapretHub
                             sb.Append(Encoding.ASCII.GetString(buf, 0, n));
                         }
                         var first = sb.ToString().Split('\n')[0].Trim();
-                        return (first.Contains(" 101"), first.Length > 0 ? first : "нет ответа", sw.ElapsedMilliseconds);
+                        return (first.Contains(" 101"), first.Length > 0 ? first : L.T("нет ответа", "no response"), sw.ElapsedMilliseconds);
                     }
                 }
             }
