@@ -45,7 +45,6 @@ namespace ZapretHub
             Controls.Add(web);
 
             BuildTray();
-            if (startHidden) { ShowInTaskbar = false; WindowState = FormWindowState.Minimized; }
 
             showEvent = new EventWaitHandle(false, EventResetMode.AutoReset, Program.ShowEventName);
             new Thread(() => { while (showEvent.WaitOne()) BeginInvoke((Action)ShowFromTray); }) { IsBackground = true }.Start();
@@ -71,13 +70,35 @@ namespace ZapretHub
             }
         }
 
-        protected override async void OnLoad(EventArgs e)
+        /// <summary>
+        /// Starting to the tray: the window gets its handle (WebView2, the hotkey and BeginInvoke need one) but is not shown.
+        /// It used to start minimized and then hide, which left its restore position at the off-screen -32000,-32000.
+        /// </summary>
+        protected override void SetVisibleCore(bool value)
+        {
+            if (value && startHidden && !shownOnce)
+            {
+                if (!IsHandleCreated) { CreateHandle(); BeginInvoke((Action)(() => _ = Initialize())); }
+                return;
+            }
+            base.SetVisibleCore(value);
+        }
+        bool shownOnce, initialized;
+
+        protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
+            _ = Initialize();
+        }
+
+        async Task Initialize()
+        {
+            if (initialized) return;
+            initialized = true;
             SetHotkey(App.Settings.Hotkey);
             try { int pref = 2; DwmSetWindowAttribute(Handle, 33, ref pref, 4); } catch { } // rounded corners on Win11
             try { int dark = 1; DwmSetWindowAttribute(Handle, 20, ref dark, 4); } catch { }
-            if (startHidden) BeginInvoke((Action)(() => { Hide(); WindowState = FormWindowState.Normal; ShowInTaskbar = true; }));
+            _ = web.Handle; // the hidden window does not create child handles on its own
             await InitWeb();
             _ = App.Startup();
         }
@@ -327,11 +348,22 @@ namespace ZapretHub
 
         void ShowFromTray()
         {
+            shownOnce = true;
             Show();
-            ShowInTaskbar = true;
             if (WindowState == FormWindowState.Minimized) WindowState = FormWindowState.Normal;
+            EnsureOnScreen();
             Activate();
             Post(new Dictionary<string, object> { ["event"] = "refresh" });
+        }
+
+        /// <summary>Brings the window back when it ended up outside every screen (unplugged monitor, a bad restore position).</summary>
+        void EnsureOnScreen()
+        {
+            if (WindowState != FormWindowState.Normal) return;
+            if (Screen.AllScreens.Any(s => s.WorkingArea.IntersectsWith(Bounds) && Rectangle.Intersect(s.WorkingArea, Bounds).Width >= 200)) return;
+            var area = Screen.PrimaryScreen.WorkingArea;
+            var size = new Size(Math.Min(Math.Max(Width, (int)(1220 * DeviceDpi / 96.0)), area.Width), Math.Min(Math.Max(Height, (int)(800 * DeviceDpi / 96.0)), area.Height));
+            Bounds = new Rectangle(area.Left + (area.Width - size.Width) / 2, area.Top + (area.Height - size.Height) / 2, size.Width, size.Height);
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
