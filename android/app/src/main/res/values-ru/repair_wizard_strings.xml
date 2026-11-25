@@ -1,0 +1,18 @@
+<resources>
+    <string name="repair_wizard_title">Помощник восстановления</string>
+    <string name="repair_step_strategy">01 · Проверка стратегий DPI</string>
+    <string name="repair_step_telegram">02 · Резервный вариант Telegram CF/Worker</string>
+    <string name="repair_step_share">03 · Поделиться диагностикой</string>
+    <string name="repair_mixed_notice">Эти HTTPS-проверки не проверяют Telegram: он использует отдельный прокси.</string>
+    <string name="repair_dpi_verified">Все выбранные HTTPS-узлы ответили. Примените стратегию, чтобы завершить этот шаг.</string>
+    <string name="repair_continue">Продолжить без подтверждённого решения</string>
+    <string name="repair_continue_telegram">Перейти к Telegram</string>
+    <string name="repair_telegram_explain">Необязательно: переключить подключение Telegram через Cloudflare/Worker на порт 80 без TLS. Это снижает защищённость соединения. Остановите прокси перед изменением, затем подключитесь снова и проверьте Telegram самостоятельно. YouTube и Discord это не изменит.</string>
+    <string name="repair_no_cf">Сначала настройте Cloudflare или Worker; иначе порт 80 не применяется.</string>
+    <string name="repair_stop_proxy">Остановите прокси Telegram перед изменением настройки.</string>
+    <string name="repair_port_enabled">Порт 80 включён. Подключитесь снова и проверьте Telegram самостоятельно.</string>
+    <string name="repair_enable_port">Включить порт 80 без TLS</string>
+    <string name="repair_telegram_works">Telegram работает — завершить</string>
+    <string name="repair_share_explain">Поделитесь обезличенной сводкой через выбранное приложение. Автоматически ничего не отправляется. Команды, домены, адреса, журналы и секреты исключены. Проверьте сводку перед отправкой.</string>
+    <string name="repair_share">Выбрать приложение</string>
+</resources>

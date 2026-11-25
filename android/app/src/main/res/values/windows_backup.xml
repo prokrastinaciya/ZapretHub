@@ -1,0 +1,5 @@
+<resources>
+    <string name="windows_backup_import">Import Windows domain lists (.zhub)</string>
+    <string name="windows_backup_imported">Windows domain lists imported. Use them in an Android strategy from the Domain lists section.</string>
+    <string name="windows_backup_empty">This backup has no user domain lists.</string>
+</resources>

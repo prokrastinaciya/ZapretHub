@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Required to run a VpnService as a system-exempted foreground service on API 34+. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
+
+    <!-- The ByeByeDPI SOCKS5 engine runs in its own process so that each start
+         gets fresh native globals (the pinned engine is not safe to restart
+         in-process) and a native crash cannot take down the Telegram engine. -->
+    <application>
+        <service
+            android:name="com.amurcanov.tgwsproxy.dpi.DpiProxyService"
+            android:exported="false"
+            android:process=":dpi"
+            android:stopWithTask="false"
+            android:foregroundServiceType="specialUse"
+            tools:ignore="ForegroundServiceType">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Keeps the user-enabled local ByeByeDPI SOCKS5 proxy running, with a stop action in the notification" />
+        </service>
+
+        <!-- System VPN: protected by BIND_VPN_SERVICE so only the system can bind,
+             in its own :vpn process, never exported. -->
+        <service
+            android:name="com.amurcanov.tgwsproxy.dpi.DpiVpnService"
+            android:exported="false"
+            android:process=":vpn"
+            android:permission="android.permission.BIND_VPN_SERVICE"
+            android:foregroundServiceType="systemExempted"
+            tools:ignore="ForegroundServicePermission,VpnServicePolicy">
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.net.VpnService.SUPPORTS_ALWAYS_ON"
+                android:value="false" />
+            <property
+                android:name="android.app.PROPERTY_SYSTEM_EXEMPTED_FGS_SUBTYPE"
+                android:value="vpn" />
+        </service>
+    </application>
+</manifest>

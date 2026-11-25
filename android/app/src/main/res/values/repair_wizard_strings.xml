@@ -1,0 +1,18 @@
+<resources>
+    <string name="repair_wizard_title">Guided repair</string>
+    <string name="repair_step_strategy">01 · Test DPI strategies</string>
+    <string name="repair_step_telegram">02 · Telegram CF/Worker fallback</string>
+    <string name="repair_step_share">03 · Share diagnostics</string>
+    <string name="repair_mixed_notice">These HTTPS checks do not test Telegram. Telegram uses a separate proxy.</string>
+    <string name="repair_dpi_verified">All selected HTTPS test targets responded. Apply this strategy to finish this step.</string>
+    <string name="repair_continue">Continue without a verified fix</string>
+    <string name="repair_continue_telegram">Continue to Telegram</string>
+    <string name="repair_telegram_explain">Optional: switch the Telegram Cloudflare/Worker connection to port 80 without TLS. This reduces transport security. Stop the proxy before changing it, then reconnect and check Telegram yourself. This does not change YouTube or Discord.</string>
+    <string name="repair_no_cf">Configure Cloudflare or a Worker first; port 80 is not relevant otherwise.</string>
+    <string name="repair_stop_proxy">Stop the Telegram proxy before changing this setting.</string>
+    <string name="repair_port_enabled">Port 80 is enabled. Reconnect and check Telegram yourself.</string>
+    <string name="repair_enable_port">Enable port 80 without TLS</string>
+    <string name="repair_telegram_works">Telegram works — finish</string>
+    <string name="repair_share_explain">Share a redacted summary using an app you choose. No report is sent automatically. Strategy commands, domains, addresses, logs and secrets are excluded. Review it before sending.</string>
+    <string name="repair_share">Choose app to share</string>
+</resources>

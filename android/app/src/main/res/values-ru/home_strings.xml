@@ -1,0 +1,25 @@
+<resources>
+    <string name="home_telegram">Telegram</string>
+    <string name="home_youtube">YouTube</string>
+    <string name="home_discord">Discord</string>
+    <string name="home_tg_subtitle">Локальный MTProto-прокси</string>
+    <string name="home_vpn_subtitle">Проверять при тестировании стратегий</string>
+    <string name="home_vpn_selection_warning">Локальный VPN перенаправляет трафик приложений на устройстве. YouTube и Discord используются для проверки стратегий.</string>
+    <string name="home_vpn_warning">Сейчас включён другой VPN. Запуск локального VPN может его отключить.</string>
+    <string name="home_socks_warning">Для работы SOCKS5 укажите этот прокси в нужных приложениях.</string>
+    <string name="home_start">Включить обход</string>
+    <string name="home_stop">Остановить</string>
+    <string name="home_socks_running">SOCKS5-прокси запущен; приложения нужно настроить</string>
+    <string name="home_partial">Не все выбранные сервисы работают</string>
+    <string name="home_select">Выбери хотя бы один сервис</string>
+    <string name="home_repair">Проверить стратегии</string>
+    <string name="home_offer_title">Возможно, включён другой VPN</string>
+    <string name="home_offer_body">При запуске VPN текущее VPN-соединение может отключиться. Telegram может работать рядом с ним. Продолжить?</string>
+    <string name="home_offer_replace">Заменить VPN</string>
+    <string name="home_offer_socks">Использовать SOCKS5</string>
+    <string name="home_dpi_title">Обход блокировок</string>
+    <string name="home_services">Сервисы</string>
+    <string name="home_strategy_section">Стратегии</string>
+    <string name="home_pick_strategy_hint">Выбрать сохранённый пресет для Android</string>
+    <string name="home_test_strategy_hint">Проверить доступ к выбранным сервисам</string>
+</resources>

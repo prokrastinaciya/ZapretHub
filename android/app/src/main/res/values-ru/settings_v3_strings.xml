@@ -1,0 +1,14 @@
+<resources>
+    <string name="settings_v3_basic">Основные</string>
+    <string name="settings_v3_pick">Подобрать стратегию</string>
+    <string name="settings_v3_change">Сменить стратегию</string>
+    <string name="settings_v3_advanced">Расширенные</string>
+    <string name="settings_v3_back">Назад к настройкам</string>
+    <string name="settings_v3_port">Запасной порт 80 для Telegram</string>
+    <string name="settings_v3_port_hint">Только для CF и Worker: вместо TLS используется незащищённый WebSocket. Прямые соединения Telegram не меняются. Для применения перезапусти прокси Telegram.</string>
+    <string name="settings_v3_boot_tg">Запускать Telegram при загрузке</string>
+    <string name="settings_v3_boot_dpi">Запускать SOCKS5 при загрузке</string>
+    <string name="settings_v3_picker_empty">Нет сохранённых стратегий. Сначала подбери стратегию.</string>
+    <string name="settings_v3_reset_confirm">Сбросить настройки ByeByeDPI? Отменить это действие нельзя.</string>
+    <string name="settings_v3_cloudflare">Cloudflare CDN</string>
+</resources>

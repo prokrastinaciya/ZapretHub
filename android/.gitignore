@@ -1,0 +1,43 @@
+# Локальный референс-оригинал (не коммитим)
+tg-ws-proxy-main/
+
+# Gradle / Android build outputs
+.kotlin/
+.gradle/
+build/
+app/build/
+app/release/
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+
+# Бинарники старых локальных сборок, в APK не попадают
+app/src/main/jniLibs/
+
+# Локальная конфигурация и секреты — НЕ коммитить
+local.properties
+*.jks
+*.keystore
+release.keystore
+gradle/gradle-daemon-jvm.properties
+
+# IDE / OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+outputs/
+
+# Вендор ByeByeDPI содержит собственные .gitignore upstream-репозиториев (например
+# `bin` в hev-socks5-tunnel), которые скрывают закоммиченные upstream'ом файлы
+# (third-part/wintun/bin/wintun.dll). Снимок добавляется принудительно:
+#   git add -f upstream/byebyedpi

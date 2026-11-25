@@ -1,0 +1,12 @@
+* text=auto
+*.py text eol=lf
+*.kt text eol=lf
+*.yml text eol=lf
+gradlew text eol=lf
+*.bat text eol=crlf
+*.ttf binary
+*.png binary
+upstream/flowseal/** -text linguist-vendored
+upstream/flowseal.lock.json linguist-vendored
+upstream/byebyedpi/** -text linguist-vendored
+upstream/byebyedpi.lock.json linguist-vendored

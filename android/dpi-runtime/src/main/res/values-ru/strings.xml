@@ -1,0 +1,10 @@
+<resources>
+    <string name="dpi_notification_channel_name">Прокси ByeByeDPI</string>
+    <string name="dpi_notification_running">SOCKS5-прокси ByeByeDPI работает</string>
+    <string name="dpi_notification_stopping">Остановка ByeByeDPI…</string>
+    <string name="dpi_notification_error">Ошибка ByeByeDPI: %1$s</string>
+    <string name="dpi_notification_disconnect">Отключить</string>
+    <string name="dpi_vpn_notification_channel_name">VPN ByeByeDPI</string>
+    <string name="dpi_vpn_notification_running">VPN ByeByeDPI защищает это устройство</string>
+    <string name="dpi_vpn_notification_stopping">Остановка VPN ByeByeDPI…</string>
+</resources>

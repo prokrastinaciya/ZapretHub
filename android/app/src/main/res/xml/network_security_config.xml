@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+    <domain-config>
+        <domain includeSubdomains="false">release-assets.githubusercontent.com</domain>
+        <trust-anchors>
+            <certificates src="system" />
+            <!-- Android 7.0 predates this root used by the GitHub release CDN. -->
+            <certificates src="@raw/isrg_root_x1" />
+        </trust-anchors>
+    </domain-config>
+</network-security-config>

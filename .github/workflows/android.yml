@@ -1,0 +1,78 @@
+name: Android build
+
+on:
+  push:
+    branches: [android]
+    paths: ['android/**', '.github/workflows/android.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.13'
+      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+        with:
+          packages: platform-tools
+      - uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
+        with:
+          cache-read-only: false
+      - name: Verify vendored source and test the Telegram runtime
+        run: |
+          python scripts/sync_upstream.py --check
+          python scripts/sync_byebyedpi.py --check
+          python -m pip install -r scripts/requirements-test.txt
+          python scripts/run_python_tests.py
+      - name: Install pinned SDK components
+        run: sdkmanager 'platforms;android-35' 'build-tools;36.0.0' 'ndk;28.2.13676358' 'cmake;3.22.1'
+      - name: Build and run JVM tests
+        run: |
+          ./gradlew --stacktrace :dpi-runtime:testDebugUnitTest :app:testArm64DebugUnitTest :app:assembleArm64Release
+      - name: Verify native libraries and APK manifest
+        run: |
+          mkdir -p dist
+          cp app/build/outputs/apk/arm64/release/*-unsigned.apk dist/ZapretHub-android-unsigned.apk
+          apk=dist/ZapretHub-android-unsigned.apk
+          python scripts/check_apk.py "$apk"
+          AAPT2="$ANDROID_HOME/build-tools/36.0.0/aapt2" python scripts/check_permissions.py "$apk"
+          "$ANDROID_HOME/build-tools/36.0.0/zipalign" -c -P 16 4 "$apk"
+          "$ANDROID_HOME/build-tools/36.0.0/aapt2" dump badging "$apk" > dist/apk-info.txt
+          grep -q "package: name='com.prokrastinaciya.zaprethub'" dist/apk-info.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: zaprethub-unsigned-apk
+          path: android/dist/
+          if-no-files-found: error
+      - name: Build emulator test packages
+        run: ./gradlew --stacktrace :app:assembleEmulatorDebug :app:assembleEmulatorDebugAndroidTest
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Exercise the Android VPN and native SOCKS lifecycle
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7
+          disable-animations: true
+          emulator-options: -no-window -no-snapshot -gpu software -noaudio -no-boot-anim -camera-back none
+          script: bash android/scripts/test_vpn_lifecycle.sh

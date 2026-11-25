@@ -6,6 +6,10 @@
 
 **Стек:** C# / .NET Framework 4.8 (встроен в Windows 10/11) + WebView2 (интерфейс на HTML/CSS). Библиотеки WebView2 вшиты в exe.
 
+## Android
+
+[APK для Android](https://github.com/prokrastinaciya/ZapretHub/releases/tag/android-v0.1.0) и [исходники Android-порта](android/README.md).
+
 ## Возможности
 - **zapret:** запуск стратегии вручную или установка службой Windows; Game Filter, IPSet (loaded/none/any), замена активных фейков, редактор списков доменов и IP, обновление ipset-списка и hosts.
 - **Редактор стратегий:** набор аргументов winws собирается в форме (блоки фильтров, метод обхода, fooling, фейки) и сохраняется как `custom (…).bat`. Свои стратегии переживают обновление zapret.

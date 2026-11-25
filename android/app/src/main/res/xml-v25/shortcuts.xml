@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Long-press the launcher icon. -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="start"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_start"
+        android:shortcutShortLabel="@string/shortcut_start">
+        <intent
+            android:action="com.prokrastinaciya.zaprethub.action.START"
+            android:targetPackage="com.prokrastinaciya.zaprethub"
+            android:targetClass="com.amurcanov.tgwsproxy.LauncherShortcutActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="stop"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_stop"
+        android:shortcutShortLabel="@string/shortcut_stop">
+        <intent
+            android:action="com.prokrastinaciya.zaprethub.action.STOP"
+            android:targetPackage="com.prokrastinaciya.zaprethub"
+            android:targetClass="com.amurcanov.tgwsproxy.LauncherShortcutActivity" />
+    </shortcut>
+</shortcuts>

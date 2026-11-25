@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="repair_probe_description">Проверяет HTTPS-доступ к сайтам и API выбранных YouTube и Discord. Ленту, видео и голос Discord проверьте сами: голос использует UDP, который эта проверка не затрагивает.</string>
+    <string name="repair_no_dpi_targets">Выберите YouTube или Discord для проверки стратегий DPI. Telegram использует отдельный прокси.</string>
+</resources>

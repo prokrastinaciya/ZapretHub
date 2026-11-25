@@ -1,0 +1,5 @@
+<resources>
+    <string name="windows_backup_import">Импортировать списки из Windows (.zhub)</string>
+    <string name="windows_backup_imported">Списки из Windows импортированы. Их можно подключить к стратегии Android из раздела «Списки доменов».</string>
+    <string name="windows_backup_empty">В архиве нет пользовательских списков доменов.</string>
+</resources>

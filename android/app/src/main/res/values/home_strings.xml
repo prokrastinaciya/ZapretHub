@@ -1,0 +1,25 @@
+<resources>
+    <string name="home_telegram">Telegram</string>
+    <string name="home_youtube">YouTube</string>
+    <string name="home_discord">Discord</string>
+    <string name="home_tg_subtitle">Local MTProto proxy</string>
+    <string name="home_vpn_subtitle">Check when testing strategies</string>
+    <string name="home_vpn_selection_warning">The local VPN routes app traffic on this device. YouTube and Discord are used to test strategies.</string>
+    <string name="home_vpn_warning">Another VPN is active. Starting the local VPN may disconnect it.</string>
+    <string name="home_socks_warning">To use SOCKS5, configure this proxy in the apps you want to connect.</string>
+    <string name="home_start">Start bypass</string>
+    <string name="home_stop">Stop</string>
+    <string name="home_socks_running">SOCKS5 proxy running; apps require configuration</string>
+    <string name="home_partial">Some selected services are not running</string>
+    <string name="home_select">Select at least one service</string>
+    <string name="home_repair">Test strategies</string>
+    <string name="home_offer_title">Another VPN may be active</string>
+    <string name="home_offer_body">Starting the VPN may disconnect your current VPN. Telegram can work alongside it. Continue?</string>
+    <string name="home_offer_replace">Replace VPN</string>
+    <string name="home_offer_socks">Use SOCKS5 instead</string>
+    <string name="home_dpi_title">Traffic bypass</string>
+    <string name="home_services">Services</string>
+    <string name="home_strategy_section">Strategies</string>
+    <string name="home_pick_strategy_hint">Choose a saved Android preset</string>
+    <string name="home_test_strategy_hint">Check access to the selected services</string>
+</resources>

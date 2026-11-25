@@ -1,0 +1,10 @@
+<resources>
+    <string name="dpi_notification_channel_name">ByeByeDPI proxy</string>
+    <string name="dpi_notification_running">ByeByeDPI SOCKS5 proxy is running</string>
+    <string name="dpi_notification_stopping">Stopping ByeByeDPI…</string>
+    <string name="dpi_notification_error">ByeByeDPI error: %1$s</string>
+    <string name="dpi_notification_disconnect">Disconnect</string>
+    <string name="dpi_vpn_notification_channel_name">ByeByeDPI VPN</string>
+    <string name="dpi_vpn_notification_running">ByeByeDPI VPN is protecting this device</string>
+    <string name="dpi_vpn_notification_stopping">Stopping ByeByeDPI VPN…</string>
+</resources>
