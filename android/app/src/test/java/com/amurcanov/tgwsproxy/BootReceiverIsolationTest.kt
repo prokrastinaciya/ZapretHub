@@ -56,7 +56,9 @@ class BootReceiverIsolationTest {
         ShadowLog.clear()
         receiver.onReceive(context, Intent(Intent.ACTION_BOOT_COMPLETED))
         val deadline = System.nanoTime() + 10_000_000_000L
-        while (!finished.isDone && System.nanoTime() < deadline) {
+        fun dpiStartRequested() = starts.any { it.component?.className == DpiProxyService::class.java.name }
+        // DpiSession dispatches the service request asynchronously after the broadcast can finish.
+        while ((!finished.isDone || !dpiStartRequested()) && System.nanoTime() < deadline) {
             shadowOf(Looper.getMainLooper()).idle()
             kotlinx.coroutines.delay(10)
         }
@@ -64,6 +66,6 @@ class BootReceiverIsolationTest {
         assertTrue("goAsync broadcast must finish", finished.isDone)
         assertTrue(ShadowLog.getLogsForTag("BootReceiver").any { it.throwable?.message == "foreground start denied" })
         assertEquals(DpiMode.SOCKS5, DpiSession.mode.value)
-        assertTrue("DPI SOCKS5 start must be requested", starts.any { it.component?.className == DpiProxyService::class.java.name })
+        assertTrue("DPI SOCKS5 start must be requested", dpiStartRequested())
     }
 }
