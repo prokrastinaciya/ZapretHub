@@ -82,6 +82,7 @@ class DpiVpnEngine(
                 .putExtra(DpiVpnService.EXTRA_REPLACEMENT_NETWORKS, proof?.confirmedNetworks?.toLongArray())
                 .putExtra(DpiVpnService.EXTRA_DNS, routing.dns)
                 .putExtra(DpiVpnService.EXTRA_IPV6, routing.ipv6)
+                .putExtra(DpiVpnService.EXTRA_BLOCK_UDP_443, routing.blockUdp443)
                 .putExtra(DpiVpnService.EXTRA_APP_LIST_MODE, routing.appListMode.name)
                 .putStringArrayListExtra(DpiVpnService.EXTRA_APPS, ArrayList(routing.apps))
                 .putExtra(DpiVpnService.EXTRA_RESULT_RECEIVER, receiver)

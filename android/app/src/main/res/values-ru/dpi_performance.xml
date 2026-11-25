@@ -1,0 +1,5 @@
+<resources>
+    <string name="dpi_block_udp_443">HTTPS через TCP (блокировать UDP/443)</string>
+    <string name="dpi_block_udp_443_hint">Если зависают видео или картинки, остановите DPI, включите настройку и снова запустите VPN. Она действует на все приложения в VPN. Остальные UDP-порты остаются доступны.</string>
+    <string name="dpi_strategy_slowest">Самая долгая успешная проверка: %1$d мс</string>
+</resources>

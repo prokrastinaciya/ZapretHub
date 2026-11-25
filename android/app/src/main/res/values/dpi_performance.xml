@@ -1,0 +1,5 @@
+<resources>
+    <string name="dpi_block_udp_443">Prefer HTTPS over TCP (block UDP/443)</string>
+    <string name="dpi_block_udp_443_hint">If video or media stalls, stop DPI, enable this option and start VPN again. This applies to all VPN apps. Other UDP ports stay available.</string>
+    <string name="dpi_strategy_slowest">Slowest successful check: %1$d ms</string>
+</resources>

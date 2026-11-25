@@ -49,7 +49,12 @@ internal fun connectionOptions(snapshot: JSONObject): DpiConnectionOptions {
     }
     val dns = text("dns_ip", "").trim()
     require(dns.isEmpty() || isNumericDnsAddress(dns)) { "DNS address must be numeric" }
-    return DpiConnectionOptions(loopback, port, DpiVpnRouting(dns = dns, ipv6 = ipv6, appListMode = appList, apps = apps), args)
+    val blockUdp443 = settings.section("zaprethub_block_udp_443")?.let {
+        require(it is Boolean) { "Invalid UDP 443 option" }
+        it
+    } ?: false
+    val routing = DpiVpnRouting(dns = dns, ipv6 = ipv6, appListMode = appList, apps = apps, blockUdp443 = blockUdp443)
+    return DpiConnectionOptions(loopback, port, routing, args)
 }
 
 /**

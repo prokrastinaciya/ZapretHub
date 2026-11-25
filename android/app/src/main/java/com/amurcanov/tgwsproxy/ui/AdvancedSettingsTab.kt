@@ -46,7 +46,9 @@ import com.amurcanov.tgwsproxy.dpi.DpiState
 import com.amurcanov.tgwsproxy.R
 import com.amurcanov.tgwsproxy.SettingsStore
 import com.amurcanov.tgwsproxy.ui.dpi.DpiAppSelector
+import com.amurcanov.tgwsproxy.dpi.DpiSettingsStore
 import com.amurcanov.tgwsproxy.ui.dpi.DpiBackupActions
+import com.amurcanov.tgwsproxy.ui.dpi.rememberDpiDocument
 import com.amurcanov.tgwsproxy.ui.dpi.DpiCommandEditor
 import com.amurcanov.tgwsproxy.ui.dpi.DpiDiagnostics
 import com.amurcanov.tgwsproxy.ui.dpi.DpiDomainLists
@@ -219,6 +221,18 @@ internal fun AdvancedSettingsTab(settingsStore: SettingsStore, onBack: () -> Uni
                 onCheckedChange = { enabled -> scope.launch { settingsStore.saveDpiAutoStartOnBoot(enabled) } },
             )
             Spacer(Modifier.height(12.dp))
+            val dpiSettings = remember(context) { DpiSettingsStore(context) }
+            val dpiDocument = rememberDpiDocument(dpiSettings)
+            val blockUdp443 = remember(dpiDocument) {
+                dpiSettings.currentSettings()["zaprethub_block_udp_443"] == true
+            }
+            SwitchRow(
+                title = stringResource(R.string.dpi_block_udp_443),
+                checked = blockUdp443,
+                enabled = dpiMode == DpiMode.VPN && (dpiState is DpiState.Off || dpiState is DpiState.Failed),
+                onCheckedChange = { dpiSettings.updateSettings(mapOf("zaprethub_block_udp_443" to it)) },
+            )
+            MonoLabel(stringResource(R.string.dpi_block_udp_443_hint))
             DpiAppSelector()
             Spacer(Modifier.height(12.dp))
             DpiCommandEditor()

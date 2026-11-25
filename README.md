@@ -8,7 +8,7 @@
 
 ## Android
 
-[APK для Android](https://github.com/prokrastinaciya/ZapretHub/releases/tag/android-v0.1.0) и [исходники Android-порта](android/README.md).
+[APK для Android](https://github.com/prokrastinaciya/ZapretHub/releases/tag/android-v0.1.1) и [исходники Android-порта](android/README.md).
 
 ## Возможности
 - **zapret:** запуск стратегии вручную или установка службой Windows; Game Filter, IPSet (loaded/none/any), замена активных фейков, редактор списков доменов и IP, обновление ipset-списка и hosts.

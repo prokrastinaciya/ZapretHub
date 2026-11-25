@@ -19,6 +19,7 @@ data class DpiVpnRouting(
     val ipv6: Boolean = true,
     val appListMode: VpnAppListMode = VpnAppListMode.ALL_APPS,
     val apps: List<String> = emptyList(),
+    val blockUdp443: Boolean = false,
 )
 
 /** Android's VPN builder only permits one kind of application list per tunnel. */

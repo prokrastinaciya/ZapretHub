@@ -33,6 +33,22 @@ class DpiStrategyTesterTest {
     }
 
     @Test
+    fun fasterCompleteStrategyRanksAheadOfTheFirstReachableStrategy() {
+        val video = DpiProbeTarget.VIDEO_EDGE
+        val slow = DpiStrategyResult(candidates[0], setOf(video), elapsedByTarget = mapOf(video to 3_500L))
+        val fast = DpiStrategyResult(candidates[1], setOf(video), elapsedByTarget = mapOf(video to 160L))
+        assertEquals(listOf(fast, slow), rankDpiStrategies(listOf(slow, fast)))
+    }
+
+    @Test
+    fun udp443FallbackIsOptInAndPersistsInTheDpiDocument() {
+        val settings = org.json.JSONObject().put("zaprethub_block_udp_443", true)
+        val document = document().put("settings", settings)
+        assertFalse(connectionOptions(org.json.JSONObject()).routing.blockUdp443)
+        assertTrue(connectionOptions(decodeDpiDocument(document.toString()).first).routing.blockUdp443)
+    }
+
+    @Test
     fun expectedApiStatusProvesReachabilityButAccessDenialDoesNot() {
         assertTrue(DpiProbeTarget.API.accepts(404))
         assertTrue(DpiProbeTarget.API.accepts(405))
@@ -67,14 +83,16 @@ class DpiStrategyTesterTest {
     @Test
     fun selectedServicesMapOnlyToTheirOwnTargets() {
         assertEquals(emptySet<DpiProbeTarget>(), dpiTargetsFor(com.amurcanov.tgwsproxy.ServiceSelection()))
-        assertEquals(setOf(DpiProbeTarget.DISCORD_WEB, DpiProbeTarget.DISCORD_API),
+        assertEquals(setOf(DpiProbeTarget.DISCORD_WEB, DpiProbeTarget.DISCORD_API,
+            DpiProbeTarget.DISCORD_GATEWAY, DpiProbeTarget.DISCORD_CDN),
             dpiTargetsFor(com.amurcanov.tgwsproxy.ServiceSelection(discord = true)))
-        assertEquals(setOf(DpiProbeTarget.WEB, DpiProbeTarget.API, DpiProbeTarget.IMAGES),
+        assertEquals(setOf(DpiProbeTarget.WEB, DpiProbeTarget.API, DpiProbeTarget.IMAGES,
+            DpiProbeTarget.VIDEO_EDGE),
             dpiTargetsFor(com.amurcanov.tgwsproxy.ServiceSelection(youtube = true)))
     }
 
     @Test
-    fun discordOnlyProbesDiscordAndStopsAfterFirstCompleteCandidate() = runBlocking {
+    fun comparesThreeCompleteCandidatesBeforeStopping() = runBlocking {
         val visited = java.util.Collections.synchronizedSet(mutableSetOf<DpiProbeTarget>())
         var starts = 0
         val engine = object : DpiEngine {
@@ -84,10 +102,10 @@ class DpiStrategyTesterTest {
         }
         val delivered = mutableListOf<DpiStrategyResult>()
         DpiStrategyTester(engine, probe = { _, target -> visited.add(target); true })
-            .test(candidates, 1081, setOf(DpiProbeTarget.DISCORD_WEB, DpiProbeTarget.DISCORD_API)) { delivered.add(it) }
+            .test(candidates + DpiStrategyCandidate("unused", listOf("-f1")), 1081, setOf(DpiProbeTarget.DISCORD_WEB, DpiProbeTarget.DISCORD_API)) { delivered.add(it) }
         assertEquals(setOf(DpiProbeTarget.DISCORD_WEB, DpiProbeTarget.DISCORD_API), visited)
-        assertEquals(1, starts)
-        assertEquals(1, delivered.size)
+        assertEquals(3, starts)
+        assertEquals(3, delivered.size)
     }
 
     @Test

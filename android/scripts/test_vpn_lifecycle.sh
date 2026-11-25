@@ -8,4 +8,4 @@ result="$(adb shell am instrument -w \
   -e class com.amurcanov.tgwsproxy.DpiLifecycleInstrumentedTest \
   com.prokrastinaciya.zaprethub.test/androidx.test.runner.AndroidJUnitRunner)"
 printf '%s\n' "$result"
-grep -Eq '^OK \(3 tests\)' <<< "$result"
+grep -Eq '^OK \(4 tests\)' <<< "$result"

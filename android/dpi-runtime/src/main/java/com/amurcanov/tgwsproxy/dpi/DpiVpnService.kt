@@ -57,6 +57,7 @@ class DpiVpnService : VpnService() {
         const val EXTRA_PORT = "EXTRA_PORT"
         const val EXTRA_DNS = "EXTRA_DNS"
         const val EXTRA_IPV6 = "EXTRA_IPV6"
+        const val EXTRA_BLOCK_UDP_443 = "EXTRA_BLOCK_UDP_443"
         const val EXTRA_APP_LIST_MODE = "EXTRA_APP_LIST_MODE"
         const val EXTRA_APPS = "EXTRA_APPS"
         const val EXTRA_REPLACEMENT_SLOT = "EXTRA_REPLACEMENT_SLOT"
@@ -156,6 +157,7 @@ class DpiVpnService : VpnService() {
         val routing = DpiVpnRouting(
             dns = intent.getStringExtra(EXTRA_DNS).orEmpty(),
             ipv6 = intent.getBooleanExtra(EXTRA_IPV6, true),
+            blockUdp443 = intent.getBooleanExtra(EXTRA_BLOCK_UDP_443, false),
             appListMode = runCatching {
                 VpnAppListMode.valueOf(intent.getStringExtra(EXTRA_APP_LIST_MODE) ?: "")
             }.getOrDefault(VpnAppListMode.ALL_APPS),
@@ -267,6 +269,7 @@ class DpiVpnService : VpnService() {
                     // startTunnel blocks in the native event loop until stopTunnel;
                     // a return without an explicit stop is a native failure/early
                     // exit, which must end the session so Running is never stale.
+                    HevNative.setBlockUdp443(routing.blockUdp443)
                     val code = TProxyService.startTunnel(tunnelConfig, fd.fd)
                     if (!stopping) {
                         Log.w(TAG, "HEV tunnel exited without stop (code $code)")

@@ -109,4 +109,4 @@ target_link_libraries(hev-socks5-tunnel PRIVATE yaml lwip hev-task-system androi
 # --wrap=hev_socks5_tunnel_run exposes the genuine native-ready signal (see
 # hev-ready-jni.c): the pinned tunnel calls that symbol exactly once, only after
 # a successful init, so reaching it is positive native readiness.
-target_link_options(hev-socks5-tunnel PRIVATE "-Wl,-z,common-page-size=16384" "-Wl,--wrap=hev_socks5_tunnel_run")
+target_link_options(hev-socks5-tunnel PRIVATE "-Wl,-z,common-page-size=16384" "-Wl,--wrap=hev_socks5_tunnel_run" "-Wl,--wrap=udp_input")

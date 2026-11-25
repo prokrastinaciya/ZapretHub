@@ -23,8 +23,8 @@ android {
         applicationId = "com.prokrastinaciya.zaprethub"
         minSdk = 24
         targetSdk = 35
-        versionCode = providers.gradleProperty("appVersionCode").orElse("100").get().toInt()
-        versionName = providers.gradleProperty("appVersionName").orElse("0.1.0").get()
+        versionCode = providers.gradleProperty("appVersionCode").orElse("101").get().toInt()
+        versionName = providers.gradleProperty("appVersionName").orElse("0.1.1").get()
         buildConfigField("String", "CORE_VERSION", "\"$coreVersion\"")
         // Android and Windows releases share a repository. The upstream updater
         // follows a different release format; download this APK from GitHub Releases.

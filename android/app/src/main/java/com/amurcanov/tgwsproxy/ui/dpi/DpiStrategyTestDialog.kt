@@ -105,6 +105,9 @@ internal fun DpiStrategyTestDialog(onDismiss: () -> Unit) {
                         if (verified != null) MonoLabel(stringResource(R.string.repair_dpi_verified))
                         rankDpiStrategies(results).take(5).forEach { result ->
                             MonoLabel(stringResource(R.string.dpi_strategy_test_score, result.reachable, result.targets.size))
+                            result.slowestMillis?.let { millis ->
+                                MonoLabel(stringResource(R.string.dpi_strategy_slowest, millis))
+                            }
                             val missing = result.targets.filter { it !in result.reached }
                             if (missing.isNotEmpty()) MonoLabel(stringResource(R.string.dpi_strategy_test_unreachable, missing.joinToString(", ") { it.host }))
                             Text(result.candidate.command, style = MaterialTheme.typography.bodySmall, color = Brand.ink)

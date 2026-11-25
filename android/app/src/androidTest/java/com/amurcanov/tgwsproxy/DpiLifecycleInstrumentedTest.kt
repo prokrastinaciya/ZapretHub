@@ -4,6 +4,11 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.VpnService
+import android.os.ParcelFileDescriptor
+import android.os.SystemClock
+import android.system.Os
+import android.system.OsConstants
+import android.system.StructPollfd
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.amurcanov.tgwsproxy.dpi.AndroidVpnSlotSampler
@@ -16,8 +21,10 @@ import com.amurcanov.tgwsproxy.dpi.DpiStrategyCandidate
 import com.amurcanov.tgwsproxy.dpi.DpiStrategyTester
 import com.amurcanov.tgwsproxy.dpi.DpiVpnEngine
 import com.amurcanov.tgwsproxy.dpi.DpiVpnService
+import com.amurcanov.tgwsproxy.dpi.HevNative
 import com.amurcanov.tgwsproxy.dpi.NativeDpiEngine
 import com.amurcanov.tgwsproxy.dpi.VpnAuthorizer
+import io.github.romanvht.byedpi.core.TProxyService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -29,9 +36,12 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.FileDescriptor
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
+import java.nio.ByteBuffer
+import kotlin.concurrent.thread
 
 @RunWith(AndroidJUnit4::class)
 class DpiLifecycleInstrumentedTest {
@@ -66,8 +76,7 @@ class DpiLifecycleInstrumentedTest {
                     }
                 })
                 tester.test(
-                    listOf(DpiStrategyCandidate("-o1", listOf("-o1")), DpiStrategyCandidate("-s1", listOf("-s1")),
-                        DpiStrategyCandidate("unused", emptyList())),
+                    listOf(DpiStrategyCandidate("-o1", listOf("-o1")), DpiStrategyCandidate("-s1", listOf("-s1"))),
                     port,
                 ) {
                     assertNull(DpiRemoteSession.inspect(context, DpiMode.SOCKS5))
@@ -109,6 +118,59 @@ class DpiLifecycleInstrumentedTest {
         } finally {
             DpiRemoteSession.stopExisting(context, DpiMode.VPN)
             shell("appops set ${context.packageName} ACTIVATE_VPN default")
+        }
+    }
+
+    @Test
+    fun udp443FallbackReturnsPortUnreachableThroughTheNativeTunnel() {
+        val peer = FileDescriptor()
+        val tunnel = FileDescriptor()
+        Os.socketpair(OsConstants.AF_UNIX, OsConstants.SOCK_DGRAM, 0, peer, tunnel)
+        try {
+            ParcelFileDescriptor.dup(tunnel).use { fd ->
+                HevNative.setBlockUdp443(true)
+                val listener = thread(name = "test-tunnel", isDaemon = true) {
+                    TProxyService.startTunnel(
+                        "tunnel:\n  mtu: 1500\nsocks5:\n  address: 127.0.0.1\n  port: 1080\n  udp: udp\n",
+                        fd.fd,
+                    )
+                }
+                try {
+                    val deadline = SystemClock.elapsedRealtime() + 3_000
+                    while (HevNative.isReady() == 0 && SystemClock.elapsedRealtime() < deadline && listener.isAlive) {
+                        Thread.sleep(10)
+                    }
+                    assertEquals("Tunnel must be ready", 1, HevNative.isReady())
+
+                    val packet = ByteBuffer.allocate(29)
+                        .put(0x45).put(0).putShort(29).putInt(0)
+                        .put(64).put(17).putShort(0)
+                        .putInt(0x0a0a0a0a).putInt(0xc6336401.toInt())
+                        .putShort(10_000).putShort(443).putShort(9).putShort(0).put(0)
+                        .array()
+                    assertEquals(packet.size, Os.write(peer, packet, 0, packet.size))
+                    val poll = StructPollfd().apply { this.fd = peer; events = OsConstants.POLLIN.toShort() }
+                    assertEquals("Expected ICMP rejection from TUN", 1, Os.poll(arrayOf(poll), 2_000))
+
+                    val reply = ByteArray(128)
+                    assertEquals(56, Os.read(peer, reply, 0, reply.size))
+                    val header = ByteBuffer.wrap(reply)
+                    assertEquals(1, reply[9].toInt()) // IPv4 protocol ICMP
+                    assertEquals(0xc6336401.toInt(), header.getInt(12))
+                    assertEquals(0x0a0a0a0a, header.getInt(16))
+                    assertEquals(3, reply[20].toInt()) // Destination unreachable
+                    assertEquals(3, reply[21].toInt()) // Port unreachable
+                    assertEquals(443, header.getShort(50).toInt())
+                } finally {
+                    TProxyService.stopTunnel()
+                    listener.join(3_000)
+                    HevNative.setBlockUdp443(false)
+                }
+                assertFalse("Tunnel must stop", listener.isAlive)
+            }
+        } finally {
+            Os.close(tunnel)
+            Os.close(peer)
         }
     }
 

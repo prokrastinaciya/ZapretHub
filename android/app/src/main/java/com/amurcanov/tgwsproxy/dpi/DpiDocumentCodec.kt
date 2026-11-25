@@ -87,7 +87,7 @@ internal const val SUCCESSFUL_STRATEGIES = "successful_strategies"
 internal const val MAX_HISTORY = 40
 internal val DOMAIN_FLAGS = setOf("isActive", "isBuiltIn", "isModified", "isDeleted")
 internal val SETTINGS_KEYS = setOf(
-    "language", "app_theme", "dns_ip", "private_dns", "ipv6_enable", "applist_type", "autostart", "auto_connect",
+    "language", "app_theme", "dns_ip", "zaprethub_block_udp_443", "private_dns", "ipv6_enable", "applist_type", "autostart", "auto_connect",
     "byedpi_mode", "byedpi_proxy_ip", "byedpi_proxy_port", "byedpi_enable_cmd_settings", "byedpi_cmd_args",
     "byedpi_max_connections", "byedpi_buffer_size", "byedpi_no_domain", "byedpi_tcp_fast_open", "byedpi_default_ttl",
     "byedpi_hosts_mode", "byedpi_hosts_blacklist", "byedpi_hosts_whitelist", "byedpi_desync_method",

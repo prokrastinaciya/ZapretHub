@@ -14,4 +14,5 @@ object HevNative {
     }
 
     external fun isReady(): Int
+    external fun setBlockUdp443(blocked: Boolean)
 }
